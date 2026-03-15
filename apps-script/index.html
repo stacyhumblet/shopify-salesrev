@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Revenue & Sales Performance</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    /* ── Flash prevention ──────────────────────────────────── */
+    html { background: #000; }
+    html[data-theme="light"] { background: #f0f4ff; }
+
+    /* ── Design tokens ─────────────────────────────────────── */
+    :root {
+      --bg:       #080e1c;
+      --surface:  rgba(255,255,255,.055);
+      --surface2: rgba(255,255,255,.03);
+      --border:   rgba(255,255,255,.08);
+      --text:     #e7ecff;
+      --muted:    #a7b1d6;
+      --primary:  #5a9fc2;
+      --primary2: #3d7fa0;
+      --accent:   #8b5cf6;
+      --good:     #10b981;
+      --warn:     #f59e0b;
+      --bad:      #ef4444;
+    }
+    [data-theme="light"] {
+      --bg:       #f0f4ff;
+      --surface:  rgba(255,255,255,.92);
+      --surface2: rgba(255,255,255,.75);
+      --border:   rgba(0,0,0,.09);
+      --text:     #1a2142;
+      --muted:    #5c6690;
+      --primary:  #1a7aaa;
+      --primary2: #0f5a80;
+      --accent:   #7c3aed;
+      --good:     #059669;
+      --warn:     #d97706;
+      --bad:      #dc2626;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      background:
+        radial-gradient(1200px 700px at 15% 0%,  rgba(90,159,194,.18), transparent 60%),
+        radial-gradient(900px  600px at 85% 5%,  rgba(139,92,246,.12), transparent 55%),
+        var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+    [data-theme="light"] body {
+      background:
+        radial-gradient(1200px 700px at 15% 0%,  rgba(90,159,194,.07), transparent 60%),
+        radial-gradient(900px  600px at 85% 5%,  rgba(139,92,246,.05), transparent 55%),
+        var(--bg);
+    }
+
+    /* ── Top bar ───────────────────────────────────────────── */
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 24px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(0,0,0,.22);
+      backdrop-filter: blur(12px);
+      position: sticky; top: 0; z-index: 20;
+      gap: 12px; flex-wrap: wrap;
+    }
+    [data-theme="light"] .topbar {
+      background: rgba(255,255,255,.82);
+      border-bottom-color: rgba(0,0,0,.08);
+    }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .brand-dot {
+      width: 10px; height: 10px; border-radius: 50%;
+      background: var(--primary);
+      box-shadow: 0 0 8px var(--primary);
+      flex-shrink: 0;
+    }
+    .brand-text { display: flex; flex-direction: column; }
+    .brand-title    { font-size: 16px; font-weight: 800; letter-spacing: .2px; }
+    .brand-subtitle { font-size: 11px; color: var(--muted); margin-top: 1px; }
+    .topbar-right   { display: flex; gap: 8px; align-items: center; }
+
+    .icon-btn {
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.04);
+      color: var(--text);
+      padding: 8px 13px;
+      border-radius: 10px;
+      font-size: 13px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .icon-btn:hover { background: rgba(255,255,255,.09); }
+    [data-theme="light"] .icon-btn { background: rgba(255,255,255,.70); }
+
+    /* ── Layout ────────────────────────────────────────────── */
+    .container {
+      width: min(1340px, calc(100% - 32px));
+      margin: 20px auto 56px;
+      display: flex; flex-direction: column; gap: 14px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 18px 20px;
+      box-shadow: 0 8px 28px rgba(0,0,0,.22);
+    }
+    [data-theme="light"] .card { box-shadow: 0 4px 18px rgba(0,0,0,.08); }
+    .card-title    { font-weight: 800; font-size: 14px; }
+    .card-subtitle { margin-top: 3px; color: var(--muted); font-size: 12px; }
+
+    /* ── Filters ───────────────────────────────────────────── */
+    .filters-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0,1fr));
+      gap: 10px;
+      margin-top: 12px;
+    }
+    @media (max-width: 900px) { .filters-grid { grid-template-columns: repeat(3,1fr); } }
+    @media (max-width: 560px) { .filters-grid { grid-template-columns: 1fr 1fr; } }
+
+    .field label {
+      display: block;
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .5px;
+      text-transform: uppercase;
+      margin-bottom: 5px;
+    }
+    select {
+      width: 100%;
+      padding: 8px 28px 8px 10px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: rgba(0,0,0,.22);
+      color: var(--text);
+      font-size: 13px;
+      outline: none;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23a7b1d6'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      cursor: pointer;
+    }
+    select:focus { border-color: var(--primary); }
+    [data-theme="light"] select { background-color: rgba(255,255,255,.88); }
+
+    .reset-btn {
+      align-self: flex-end;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.04);
+      color: var(--muted);
+      padding: 8px 14px;
+      border-radius: 10px;
+      font-size: 13px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .reset-btn:hover { background: rgba(255,255,255,.08); color: var(--text); }
+
+    /* ── KPI Pills ─────────────────────────────────────────── */
+    .kpi-row {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 10px;
+    }
+    @media (max-width: 1000px) { .kpi-row { grid-template-columns: repeat(3,1fr); } }
+    @media (max-width: 560px)  { .kpi-row { grid-template-columns: 1fr 1fr; } }
+
+    .kpi-pill {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px 16px;
+    }
+    .kpi-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .5px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .kpi-value {
+      font-size: 22px;
+      font-weight: 800;
+      line-height: 1;
+      color: var(--text);
+    }
+    .kpi-sub {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+    .kpi-pill.highlight { border-color: var(--primary); }
+    .kpi-pill.highlight .kpi-value { color: var(--primary); }
+    .kpi-pill.good .kpi-value { color: var(--good); }
+    .kpi-pill.warn .kpi-value { color: var(--warn); }
+    .kpi-pill.bad  .kpi-value { color: var(--bad);  }
+
+    /* ── Chart rows ────────────────────────────────────────── */
+    .chart-row {
+      display: grid;
+      gap: 14px;
+    }
+    .chart-row-2-1 { grid-template-columns: 2fr 1fr; }
+    .chart-row-1-2 { grid-template-columns: 1fr 2fr; }
+    @media (max-width: 860px) {
+      .chart-row-2-1,
+      .chart-row-1-2 { grid-template-columns: 1fr; }
+    }
+
+    .chart-wrap {
+      position: relative;
+      height: 260px;
+      margin-top: 14px;
+    }
+    .chart-wrap-sm {
+      position: relative;
+      height: 240px;
+      margin-top: 14px;
+    }
+
+    /* ── Loading ───────────────────────────────────────────── */
+    #loading {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 60vh;
+      gap: 16px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .spinner {
+      width: 40px; height: 40px;
+      border: 3px solid rgba(90,159,194,.2);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin .8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    #dashboard { display: none; }
+
+    /* ── Error ─────────────────────────────────────────────── */
+    #error-msg {
+      display: none;
+      background: rgba(239,68,68,.1);
+      border: 1px solid rgba(239,68,68,.3);
+      color: #fca5a5;
+      padding: 16px 20px;
+      border-radius: 12px;
+      font-size: 13px;
+      margin: 20px 0;
+    }
+
+    /* ── Legend dots ───────────────────────────────────────── */
+    .legend-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 10px;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .legend-dot {
+      width: 10px; height: 10px;
+      border-radius: 3px;
+      flex-shrink: 0;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Top bar -->
+<div class="topbar">
+  <div class="brand">
+    <div class="brand-dot"></div>
+    <div class="brand-text">
+      <div class="brand-title">Revenue &amp; Sales Performance</div>
+      <div class="brand-subtitle">Creator &amp; Ecommerce · Northwind Consulting</div>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <button class="icon-btn" onclick="toggleTheme()">☀️ Light</button>
+  </div>
+</div>
+
+<!-- Loading -->
+<div id="loading">
+  <div class="spinner"></div>
+  <span>Loading revenue data…</span>
+</div>
+
+<!-- Error -->
+<div class="container">
+  <div id="error-msg"></div>
+</div>
+
+<!-- Dashboard -->
+<div id="dashboard">
+  <div class="container">
+
+    <!-- Filters -->
+    <div class="card">
+      <div class="card-title">Filters</div>
+      <div class="filters-grid">
+        <div class="field">
+          <label>Year</label>
+          <select id="f-year" onchange="applyFilters()">
+            <option value="">All Years</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Month</label>
+          <select id="f-month" onchange="applyFilters()">
+            <option value="">All Months</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Financial Status</label>
+          <select id="f-status" onchange="applyFilters()">
+            <option value="">All Statuses</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Channel (UTM Source)</label>
+          <select id="f-source" onchange="applyFilters()">
+            <option value="">All Channels</option>
+          </select>
+        </div>
+        <button class="reset-btn" onclick="resetFilters()">↺ Reset</button>
+      </div>
+    </div>
+
+    <!-- KPI Row -->
+    <div class="kpi-row">
+      <div class="kpi-pill highlight">
+        <div class="kpi-label">Total Revenue</div>
+        <div class="kpi-value" id="kpi-revenue">—</div>
+        <div class="kpi-sub">Gross order value</div>
+      </div>
+      <div class="kpi-pill good">
+        <div class="kpi-label">Net Sales</div>
+        <div class="kpi-value" id="kpi-net">—</div>
+        <div class="kpi-sub">After refunds &amp; discounts</div>
+      </div>
+      <div class="kpi-pill">
+        <div class="kpi-label">Total Orders</div>
+        <div class="kpi-value" id="kpi-orders">—</div>
+        <div class="kpi-sub">Transactions</div>
+      </div>
+      <div class="kpi-pill">
+        <div class="kpi-label">Avg Order Value</div>
+        <div class="kpi-value" id="kpi-aov">—</div>
+        <div class="kpi-sub">Revenue / orders</div>
+      </div>
+      <div class="kpi-pill warn">
+        <div class="kpi-label">Discount Rate</div>
+        <div class="kpi-value" id="kpi-disc">—</div>
+        <div class="kpi-sub">% of gross revenue</div>
+      </div>
+      <div class="kpi-pill" id="kpi-ref-pill">
+        <div class="kpi-label">Refund Rate</div>
+        <div class="kpi-value" id="kpi-ref">—</div>
+        <div class="kpi-sub">% of gross revenue</div>
+      </div>
+    </div>
+
+    <!-- Revenue Trend + Channel Mix -->
+    <div class="chart-row chart-row-2-1">
+      <div class="card">
+        <div class="card-title">Revenue Trend</div>
+        <div class="card-subtitle">Monthly gross revenue vs. net sales</div>
+        <div class="legend-row">
+          <div class="legend-item"><div class="legend-dot" style="background:#5a9fc2"></div>Total Revenue</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#10b981"></div>Net Sales</div>
+        </div>
+        <div class="chart-wrap"><canvas id="chart-trend"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Channel Mix</div>
+        <div class="card-subtitle">Net sales by UTM source</div>
+        <div class="chart-wrap-sm"><canvas id="chart-channel"></canvas></div>
+      </div>
+    </div>
+
+    <!-- Financial Status + Top Campaigns -->
+    <div class="chart-row chart-row-1-2">
+      <div class="card">
+        <div class="card-title">Order Status</div>
+        <div class="card-subtitle">Orders by financial status</div>
+        <div class="chart-wrap-sm"><canvas id="chart-status"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Top Campaigns</div>
+        <div class="card-subtitle">Net sales by UTM campaign (top 10)</div>
+        <div class="chart-wrap"><canvas id="chart-campaigns"></canvas></div>
+      </div>
+    </div>
+
+  </div><!-- /container -->
+</div><!-- /dashboard -->
+
+<script>
+// ── State ──────────────────────────────────────────────────────────────────────
+let allRows  = [];
+let charts   = {};
+
+// ── Boot ───────────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  const saved = localStorage.getItem('rev-theme');
+  if (saved) applyTheme(saved);
+
+  google.script.run
+    .withSuccessHandler(onData)
+    .withFailureHandler(onError)
+    .getRevenueData();
+});
+
+function onData(data) {
+  allRows = data.rows || [];
+  populateFilters(data.fo);
+  render();
+  document.getElementById('loading').style.display   = 'none';
+  document.getElementById('dashboard').style.display = 'block';
+}
+
+function onError(e) {
+  document.getElementById('loading').style.display = 'none';
+  const el = document.getElementById('error-msg');
+  el.style.display = 'block';
+  el.textContent = 'Error loading data: ' + (e.message || String(e));
+}
+
+// ── Filters ────────────────────────────────────────────────────────────────────
+function populateFilters(fo) {
+  const sel = (id, items, labelFn) => {
+    const el = document.getElementById(id);
+    items.forEach(item => {
+      const opt = document.createElement('option');
+      opt.value = typeof item === 'object' ? item.value : item;
+      opt.textContent = typeof item === 'object' ? item.label : item;
+      el.appendChild(opt);
+    });
+  };
+  sel('f-year',   fo.years);
+  sel('f-month',  fo.months);
+  sel('f-status', fo.statuses);
+  sel('f-source', fo.sources);
+}
+
+function getFilters() {
+  return {
+    year:   document.getElementById('f-year').value,
+    month:  document.getElementById('f-month').value,
+    status: document.getElementById('f-status').value,
+    source: document.getElementById('f-source').value,
+  };
+}
+
+function applyFilters() { render(); }
+
+function resetFilters() {
+  ['f-year','f-month','f-status','f-source'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  render();
+}
+
+function filteredRows() {
+  const f = getFilters();
+  return allRows.filter(r =>
+    (!f.year   || r.yr        === f.year)   &&
+    (!f.month  || r.mo        === f.month)  &&
+    (!f.status || r.finStatus === f.status) &&
+    (!f.source || r.src       === f.source)
+  );
+}
+
+// ── Render ─────────────────────────────────────────────────────────────────────
+function render() {
+  const rows = filteredRows();
+
+  // ── KPIs ──────────────────────────────────────────────────
+  let totRev = 0, totNet = 0, totDisc = 0, totRef = 0;
+  rows.forEach(r => { totRev += r.total; totNet += r.net; totDisc += r.disc; totRef += r.ref; });
+  const orders  = rows.length;
+  const aov     = orders > 0 ? totRev / orders : 0;
+  const discRate = totRev > 0 ? totDisc / totRev * 100 : 0;
+  const refRate  = totRev > 0 ? totRef  / totRev * 100 : 0;
+
+  document.getElementById('kpi-revenue').textContent = fmt$(totRev);
+  document.getElementById('kpi-net').textContent     = fmt$(totNet);
+  document.getElementById('kpi-orders').textContent  = fmtN(orders);
+  document.getElementById('kpi-aov').textContent     = fmt$(aov);
+  document.getElementById('kpi-disc').textContent    = discRate.toFixed(1) + '%';
+  document.getElementById('kpi-ref').textContent     = refRate.toFixed(1) + '%';
+
+  // Color refund pill based on value
+  const refPill = document.getElementById('kpi-ref-pill');
+  refPill.classList.remove('good','warn','bad');
+  if (refRate < 2)       refPill.classList.add('good');
+  else if (refRate < 5)  refPill.classList.add('warn');
+  else                   refPill.classList.add('bad');
+
+  // ── Monthly trend ──────────────────────────────────────────
+  const monthlyMap = {};
+  rows.forEach(r => {
+    if (!r.mKey) return;
+    if (!monthlyMap[r.mKey]) monthlyMap[r.mKey] = { label: r.mLabel, rev: 0, net: 0 };
+    monthlyMap[r.mKey].rev += r.total;
+    monthlyMap[r.mKey].net += r.net;
+  });
+  const sorted    = Object.entries(monthlyMap).sort(([a],[b]) => a.localeCompare(b));
+  const tLabels   = sorted.map(([,v]) => v.label);
+  const tRevData  = sorted.map(([,v]) => +v.rev.toFixed(2));
+  const tNetData  = sorted.map(([,v]) => +v.net.toFixed(2));
+
+  renderChart('chart-trend', 'bar', tLabels, [
+    { label: 'Total Revenue', data: tRevData, backgroundColor: 'rgba(90,159,194,.70)', borderColor: '#5a9fc2', borderWidth: 1.5, borderRadius: 4 },
+    { label: 'Net Sales',     data: tNetData, type: 'line', borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,.12)', borderWidth: 2, pointRadius: 3, tension: .35, fill: true },
+  ], { y: { title: 'Revenue ($)' } });
+
+  // ── Channel mix ────────────────────────────────────────────
+  const srcMap = {};
+  rows.forEach(r => {
+    srcMap[r.src] = (srcMap[r.src] || 0) + r.net;
+  });
+  const srcEntries = Object.entries(srcMap).sort(([,a],[,b]) => b - a);
+  renderChart('chart-channel', 'doughnut', srcEntries.map(([k]) => k), [
+    { data: srcEntries.map(([,v]) => +v.toFixed(2)),
+      backgroundColor: PALETTE.slice(0, srcEntries.length),
+      borderColor: 'transparent', hoverOffset: 6 }
+  ], { legend: true });
+
+  // ── Financial status ───────────────────────────────────────
+  const statusMap = {};
+  rows.forEach(r => {
+    statusMap[r.finStatus] = (statusMap[r.finStatus] || 0) + 1;
+  });
+  const statusEntries = Object.entries(statusMap).sort(([,a],[,b]) => b - a);
+  const statusColors  = statusEntries.map(([k]) =>
+    k === 'paid'     ? '#10b981' :
+    k === 'refunded' ? '#ef4444' :
+    k === 'pending'  ? '#f59e0b' :
+    k === 'voided'   ? '#6b7280' : '#5a9fc2'
+  );
+  renderChart('chart-status', 'doughnut', statusEntries.map(([k]) => k), [
+    { data: statusEntries.map(([,v]) => v),
+      backgroundColor: statusColors,
+      borderColor: 'transparent', hoverOffset: 6 }
+  ], { legend: true, valueLabel: 'orders' });
+
+  // ── Top campaigns ──────────────────────────────────────────
+  const campMap = {};
+  rows.forEach(r => {
+    campMap[r.camp] = (campMap[r.camp] || 0) + r.net;
+  });
+  const campEntries = Object.entries(campMap)
+    .filter(([k]) => k !== '(none)')
+    .sort(([,a],[,b]) => b - a)
+    .slice(0, 10);
+  renderChart('chart-campaigns', 'bar', campEntries.map(([k]) => k), [
+    { label: 'Net Sales', data: campEntries.map(([,v]) => +v.toFixed(2)),
+      backgroundColor: campEntries.map((_, i) => PALETTE[i % PALETTE.length]),
+      borderRadius: 4, borderSkipped: false }
+  ], { indexAxis: 'y', x: { title: 'Net Sales ($)' } });
+}
+
+
+// ── Chart helpers ──────────────────────────────────────────────────────────────
+const PALETTE = [
+  '#5a9fc2','#8b5cf6','#10b981','#f59e0b','#ef4444',
+  '#06b6d4','#ec4899','#84cc16','#f97316','#a78bfa',
+];
+
+function renderChart(id, type, labels, datasets, opts = {}) {
+  const isDark = document.documentElement.getAttribute('data-theme') !== 'light';
+  const textColor = isDark ? '#a7b1d6' : '#5c6690';
+  const gridColor = isDark ? 'rgba(255,255,255,.06)' : 'rgba(0,0,0,.06)';
+
+  if (charts[id]) { charts[id].destroy(); delete charts[id]; }
+
+  const ctx  = document.getElementById(id).getContext('2d');
+  const isDoughnut = type === 'doughnut';
+
+  const scaleDefaults = {
+    ticks: { color: textColor, font: { size: 11 } },
+    grid:  { color: gridColor },
+  };
+
+  const axisScales = {};
+  if (!isDoughnut) {
+    if (opts.indexAxis === 'y') {
+      axisScales.x = { ...scaleDefaults, beginAtZero: true,
+        title: opts.x ? { display: true, text: opts.x.title, color: textColor, font: { size: 11 } } : undefined };
+      axisScales.y = { ...scaleDefaults };
+    } else {
+      axisScales.x = { ...scaleDefaults };
+      axisScales.y = { ...scaleDefaults, beginAtZero: true,
+        title: opts.y ? { display: true, text: opts.y.title, color: textColor, font: { size: 11 } } : undefined };
+    }
+  }
+
+  charts[id] = new Chart(ctx, {
+    type,
+    data: { labels, datasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      indexAxis: opts.indexAxis || 'x',
+      plugins: {
+        legend: {
+          display: isDoughnut || !!opts.legend,
+          position: isDoughnut ? 'right' : 'top',
+          labels: { color: textColor, font: { size: 11 }, boxWidth: 12, padding: 12 },
+        },
+        tooltip: {
+          callbacks: {
+            label: ctx => {
+              const val = ctx.parsed.y ?? ctx.parsed.x ?? ctx.parsed;
+              if (opts.valueLabel === 'orders') return ` ${val} orders`;
+              return ` $${Number(val).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+            },
+          },
+        },
+      },
+      scales: isDoughnut ? {} : axisScales,
+    },
+  });
+}
+
+
+// ── Theme ──────────────────────────────────────────────────────────────────────
+function toggleTheme() {
+  const current = document.documentElement.getAttribute('data-theme') || 'dark';
+  applyTheme(current === 'light' ? 'dark' : 'light');
+}
+
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme === 'light' ? 'light' : '');
+  document.querySelector('.icon-btn').textContent = theme === 'light' ? '🌙 Dark' : '☀️ Light';
+  localStorage.setItem('rev-theme', theme);
+  // Re-render charts with correct colors
+  if (allRows.length > 0) render();
+}
+
+
+// ── Formatters ─────────────────────────────────────────────────────────────────
+function fmt$(n) {
+  if (n >= 1_000_000) return '$' + (n / 1_000_000).toFixed(2) + 'M';
+  if (n >= 1_000)     return '$' + (n / 1_000).toFixed(1) + 'K';
+  return '$' + n.toFixed(2);
+}
+function fmtN(n) {
+  return n >= 1000 ? (n / 1000).toFixed(1) + 'K' : String(n);
+}
+</script>
+</body>
+</html>
