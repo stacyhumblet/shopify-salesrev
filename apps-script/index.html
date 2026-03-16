@@ -708,10 +708,11 @@ document.addEventListener('DOMContentLoaded', () => {
   setScheme(savedScheme);
   loadSettings();
 
-  google.script.run
-    .withSuccessHandler(onData)
-    .withFailureHandler(onError)
-    .getRevenueData();
+  const DATA_URL = 'https://script.google.com/macros/s/AKfycbyRJF2RWQROhjMDEQEyATTjgQ1jlBUbTRcDJ_132hjYOokSlTdLBN7ZuW4AuS8BkD3g/exec';
+  fetch(DATA_URL)
+    .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+    .then(onData)
+    .catch(onError);
 });
 
 function onData(data) {

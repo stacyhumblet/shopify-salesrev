@@ -10,11 +10,18 @@ const CACHE_KEY     = 'rev_dash_v1';
 const CACHE_TTL     = 21600; // 6 hours
 
 
-// ── Entry point — serve the HTML dashboard ────────────────────────────────────
+// ── Entry point — return JSON data for the Cloudflare-hosted dashboard ────────
 function doGet() {
-  return HtmlService.createHtmlOutputFromFile('index')
-    .setTitle('Revenue & Sales Performance')
-    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+  try {
+    const output = ContentService
+      .createTextOutput(JSON.stringify(getRevenueData()))
+      .setMimeType(ContentService.MimeType.JSON);
+    return output;
+  } catch (e) {
+    return ContentService
+      .createTextOutput(JSON.stringify({ error: e.toString() }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
 }
 
 
