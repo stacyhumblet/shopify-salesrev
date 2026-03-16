@@ -41,8 +41,10 @@
     }
 
     /* ── Colour schemes ─────────────────────────────────────── */
-    /* slate = :root defaults (no class needed) */
     html.scheme-creator { --primary:#a855f7; --primary2:#7c3aed; --accent:#06b6d4; }
+    html.scheme-slate   { --primary:#78909c; --primary2:#546e7a; --accent:#90a4ae; }
+    html.scheme-creator[data-theme="light"] { --primary:#7c3aed; --primary2:#6d28d9; --accent:#0284c7; }
+    html.scheme-slate[data-theme="light"]   { --primary:#546e7a; --primary2:#37474f; --accent:#607d8b; }
     html.scheme-ocean   { --primary:#0ea5e9; --primary2:#0284c7; --accent:#22d3ee; }
     html.scheme-sunset  { --primary:#f97316; --primary2:#ea580c; --accent:#ec4899; }
     html.scheme-forest  { --primary:#10b981; --primary2:#059669; --accent:#34d399; }
@@ -1003,9 +1005,7 @@ function render() {
     renderChart('chart-discount-depth', 'bar', discEntries.map(([k]) => k), [
       { label: 'Avg Discount %',
         data: discEntries.map(([,v]) => +v.toFixed(1)),
-        backgroundColor: discEntries.map(([,v]) =>
-          v > 20 ? 'rgba(239,68,68,.80)' : v > 10 ? hexAlpha(sc.c2,.75) : hexAlpha(sc.c1,.75)
-        ),
+        backgroundColor: discEntries.map((_, i) => sc.palette[i % sc.palette.length]),
         borderRadius: 4, borderSkipped: false }
     ], { indexAxis: 'y', x: { title: 'Avg Discount %' }, valueLabel: 'pct' });
   }
@@ -1042,8 +1042,8 @@ function setDelta(subId, current, prior, label) {
 const SCHEMES = {
   creator: { c1:'#a855f7', c2:'#06b6d4', c3:'#10b981',
     palette:['#a855f7','#06b6d4','#10b981','#7c3aed','#22d3ee','#34d399','#8b5cf6','#67e8f9','#6ee7b7','#c084fc'] },
-  slate:   { c1:'#5a9fc2', c2:'#3d7fa0', c3:'#7b93b0',
-    palette:['#5a9fc2','#3d7fa0','#7b93b0','#4a7a9b','#6b8f9e','#7899b2','#8fafc2','#95afc0','#a8c0cf','#b8d0de'] },
+  slate:   { c1:'#94a3b8', c2:'#64748b', c3:'#78909c',
+    palette:['#94a3b8','#64748b','#78909c','#b0bec5','#546e7a','#90a4ae','#607d8b','#cfd8dc','#9badb8','#b0c4cf'] },
   ocean:   { c1:'#0ea5e9', c2:'#22d3ee', c3:'#38bdf8',
     palette:['#0ea5e9','#22d3ee','#38bdf8','#0284c7','#7dd3fc','#60a5fa','#93c5fd','#bae6fd','#0369a1','#075985'] },
   sunset:  { c1:'#f97316', c2:'#ec4899', c3:'#f59e0b',
@@ -1125,7 +1125,7 @@ function setScheme(scheme, btn) {
   if (target) target.classList.add('active');
   const html = document.documentElement;
   html.className = html.className.replace(/\bscheme-\w+/g, '').trim();
-  if (currentScheme !== 'slate') html.classList.add('scheme-' + currentScheme);
+  html.classList.add('scheme-' + currentScheme);
   const sc = SCHEMES[currentScheme];
   let bgEl = document.getElementById('scheme-bg-style');
   if (!bgEl) { bgEl = document.createElement('style'); bgEl.id = 'scheme-bg-style'; document.head.appendChild(bgEl); }
