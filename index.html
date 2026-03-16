@@ -41,10 +41,13 @@
     }
 
     /* ── Colour schemes ─────────────────────────────────────── */
+    /* slate = :root defaults (no class needed) */
+    html.scheme-creator { --primary:#a855f7; --primary2:#7c3aed; --accent:#06b6d4; }
     html.scheme-ocean   { --primary:#0ea5e9; --primary2:#0284c7; --accent:#22d3ee; }
     html.scheme-sunset  { --primary:#f97316; --primary2:#ea580c; --accent:#ec4899; }
     html.scheme-forest  { --primary:#10b981; --primary2:#059669; --accent:#34d399; }
     html.scheme-rose    { --primary:#e879f9; --primary2:#d946ef; --accent:#a855f7; }
+    html.scheme-creator[data-theme="light"] { --primary:#7c3aed; --primary2:#6d28d9; --accent:#0284c7; }
     html.scheme-ocean[data-theme="light"]  { --primary:#0284c7; --primary2:#0369a1; --accent:#0ea5e9; }
     html.scheme-sunset[data-theme="light"] { --primary:#ea580c; --primary2:#c2410c; --accent:#db2777; }
     html.scheme-forest[data-theme="light"] { --primary:#059669; --primary2:#047857; --accent:#10b981; }
@@ -469,7 +472,10 @@
   </div>
   <div class="scheme-pills">
     <button class="scheme-pill active" data-scheme="creator" onclick="setScheme('creator',this)">
-      <span class="scheme-swatch" style="background:linear-gradient(135deg,#5a9fc2,#8b5cf6)"></span>Creator
+      <span class="scheme-swatch" style="background:linear-gradient(135deg,#a855f7,#06b6d4)"></span>Creator
+    </button>
+    <button class="scheme-pill" data-scheme="slate" onclick="setScheme('slate',this)">
+      <span class="scheme-swatch" style="background:linear-gradient(135deg,#5a9fc2,#7b93b0)"></span>Slate
     </button>
     <button class="scheme-pill" data-scheme="ocean" onclick="setScheme('ocean',this)">
       <span class="scheme-swatch" style="background:linear-gradient(135deg,#0ea5e9,#22d3ee)"></span>Ocean
@@ -958,11 +964,7 @@ function render() {
   const statusMap = {};
   rows.forEach(r => { statusMap[r.finStatus] = (statusMap[r.finStatus] || 0) + 1; });
   const statusEntries = Object.entries(statusMap).sort(([,a],[,b]) => b - a);
-  const statusColors  = statusEntries.map(([k], i) =>
-    k === 'refunded' ? 'rgba(239,68,68,.80)' :
-    k === 'voided'   ? 'rgba(107,114,128,.70)' :
-    sc.palette[i % sc.palette.length]
-  );
+  const statusColors = statusEntries.map((_, i) => sc.palette[i % sc.palette.length]);
   renderChart('chart-status', 'doughnut', statusEntries.map(([k]) => k), [
     { data: statusEntries.map(([,v]) => v),
       backgroundColor: statusColors,
@@ -1038,16 +1040,18 @@ function setDelta(subId, current, prior, label) {
 
 // ── Chart helpers ──────────────────────────────────────────────────────────────
 const SCHEMES = {
-  creator: { c1:'#5a9fc2', c2:'#8b5cf6', c3:'#10b981',
-    palette:['#5a9fc2','#8b5cf6','#10b981','#f59e0b','#ef4444','#06b6d4','#ec4899','#84cc16','#f97316','#a78bfa'] },
-  ocean:   { c1:'#0ea5e9', c2:'#22d3ee', c3:'#06b6d4',
-    palette:['#0ea5e9','#22d3ee','#06b6d4','#38bdf8','#0284c7','#7dd3fc','#60a5fa','#93c5fd','#bae6fd','#0c4a6e'] },
+  creator: { c1:'#a855f7', c2:'#06b6d4', c3:'#10b981',
+    palette:['#a855f7','#06b6d4','#10b981','#7c3aed','#22d3ee','#34d399','#8b5cf6','#67e8f9','#6ee7b7','#c084fc'] },
+  slate:   { c1:'#5a9fc2', c2:'#3d7fa0', c3:'#7b93b0',
+    palette:['#5a9fc2','#3d7fa0','#7b93b0','#4a7a9b','#6b8f9e','#7899b2','#8fafc2','#95afc0','#a8c0cf','#b8d0de'] },
+  ocean:   { c1:'#0ea5e9', c2:'#22d3ee', c3:'#38bdf8',
+    palette:['#0ea5e9','#22d3ee','#38bdf8','#0284c7','#7dd3fc','#60a5fa','#93c5fd','#bae6fd','#0369a1','#075985'] },
   sunset:  { c1:'#f97316', c2:'#ec4899', c3:'#f59e0b',
-    palette:['#f97316','#ec4899','#f59e0b','#ef4444','#a855f7','#fb923c','#f472b6','#fbbf24','#fca5a5','#e879f9'] },
+    palette:['#f97316','#ec4899','#f59e0b','#fb923c','#f472b6','#fbbf24','#fdba74','#f9a8d4','#fde68a','#fed7aa'] },
   forest:  { c1:'#10b981', c2:'#34d399', c3:'#6ee7b7',
-    palette:['#10b981','#34d399','#6ee7b7','#059669','#84cc16','#4ade80','#a3e635','#86efac','#65a30d','#047857'] },
+    palette:['#10b981','#34d399','#6ee7b7','#059669','#14b8a6','#4ade80','#2dd4bf','#86efac','#5eead4','#a7f3d0'] },
   rose:    { c1:'#e879f9', c2:'#a855f7', c3:'#818cf8',
-    palette:['#e879f9','#a855f7','#818cf8','#ec4899','#f0abfc','#c084fc','#f9a8d4','#d8b4fe','#9333ea','#7c3aed'] },
+    palette:['#e879f9','#a855f7','#818cf8','#f0abfc','#c084fc','#a5b4fc','#f9a8d4','#d8b4fe','#c7d2fe','#ddd6fe'] },
 };
 let currentScheme = 'creator';
 
@@ -1121,7 +1125,7 @@ function setScheme(scheme, btn) {
   if (target) target.classList.add('active');
   const html = document.documentElement;
   html.className = html.className.replace(/\bscheme-\w+/g, '').trim();
-  if (currentScheme !== 'creator') html.classList.add('scheme-' + currentScheme);
+  if (currentScheme !== 'slate') html.classList.add('scheme-' + currentScheme);
   const sc = SCHEMES[currentScheme];
   let bgEl = document.getElementById('scheme-bg-style');
   if (!bgEl) { bgEl = document.createElement('style'); bgEl.id = 'scheme-bg-style'; document.head.appendChild(bgEl); }
