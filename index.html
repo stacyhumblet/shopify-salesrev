@@ -958,11 +958,10 @@ function render() {
   const statusMap = {};
   rows.forEach(r => { statusMap[r.finStatus] = (statusMap[r.finStatus] || 0) + 1; });
   const statusEntries = Object.entries(statusMap).sort(([,a],[,b]) => b - a);
-  const statusColors  = statusEntries.map(([k]) =>
-    k === 'paid'     ? '#10b981' :
-    k === 'refunded' ? '#ef4444' :
-    k === 'pending'  ? '#f59e0b' :
-    k === 'voided'   ? '#6b7280' : '#5a9fc2'
+  const statusColors  = statusEntries.map(([k], i) =>
+    k === 'refunded' ? 'rgba(239,68,68,.80)' :
+    k === 'voided'   ? 'rgba(107,114,128,.70)' :
+    sc.palette[i % sc.palette.length]
   );
   renderChart('chart-status', 'doughnut', statusEntries.map(([k]) => k), [
     { data: statusEntries.map(([,v]) => v),
@@ -1003,7 +1002,7 @@ function render() {
       { label: 'Avg Discount %',
         data: discEntries.map(([,v]) => +v.toFixed(1)),
         backgroundColor: discEntries.map(([,v]) =>
-          v > 20 ? 'rgba(239,68,68,.75)' : v > 10 ? 'rgba(245,158,11,.75)' : 'rgba(16,185,129,.75)'
+          v > 20 ? 'rgba(239,68,68,.80)' : v > 10 ? hexAlpha(sc.c2,.75) : hexAlpha(sc.c1,.75)
         ),
         borderRadius: 4, borderSkipped: false }
     ], { indexAxis: 'y', x: { title: 'Avg Discount %' }, valueLabel: 'pct' });
