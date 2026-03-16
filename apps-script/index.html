@@ -337,9 +337,9 @@
     /* amber — watch metrics (keep low) */
     .kpi-pill.warn { border-color: var(--warn); }
     .kpi-pill.warn .kpi-value { color: var(--warn); }
-    /* red — critical threshold exceeded */
-    .kpi-pill.bad { border-color: var(--bad); }
-    .kpi-pill.bad .kpi-value { color: var(--bad); }
+    /* red — critical threshold exceeded (uses warn so it shifts with scheme) */
+    .kpi-pill.bad { border-color: var(--warn); }
+    .kpi-pill.bad .kpi-value { color: var(--warn); }
 
     /* delta badge */
     .delta {
