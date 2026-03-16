@@ -4,23 +4,17 @@
 //  Northwind Consulting — Creator & Ecommerce
 // ============================================================
 
-const DATA_SHEET_ID = '1XojNK4GrGY6j7JeP47fWOep4Iv-S42-D-7dY9OUJ3CA';
+const DATA_SHEET_ID = '1c86yKsvHafajJSLYiHDrFQ6Evgx9rxGJTalRSEI46l0';
 const REVENUE_TAB   = 'db_revenue';
 const CACHE_KEY     = 'rev_dash_v1';
 const CACHE_TTL     = 21600; // 6 hours
 
 
-// ── Entry point (API / web app mode) ──────────────────────────────────────────
+// ── Entry point — serve the HTML dashboard ────────────────────────────────────
 function doGet() {
-  try {
-    return ContentService
-      .createTextOutput(JSON.stringify(getRevenueData()))
-      .setMimeType(ContentService.MimeType.JSON);
-  } catch (e) {
-    return ContentService
-      .createTextOutput(JSON.stringify({ error: e.toString() }))
-      .setMimeType(ContentService.MimeType.JSON);
-  }
+  return HtmlService.createHtmlOutputFromFile('index')
+    .setTitle('Revenue & Sales Performance')
+    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 }
 
 
