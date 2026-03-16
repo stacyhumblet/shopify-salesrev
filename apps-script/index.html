@@ -40,6 +40,47 @@
       --bad:      #dc2626;
     }
 
+    /* ── Colour schemes ─────────────────────────────────────── */
+    html.scheme-ocean   { --primary:#0ea5e9; --primary2:#0284c7; --accent:#22d3ee; }
+    html.scheme-sunset  { --primary:#f97316; --primary2:#ea580c; --accent:#ec4899; }
+    html.scheme-forest  { --primary:#10b981; --primary2:#059669; --accent:#34d399; }
+    html.scheme-rose    { --primary:#e879f9; --primary2:#d946ef; --accent:#a855f7; }
+    html.scheme-ocean[data-theme="light"]  { --primary:#0284c7; --primary2:#0369a1; --accent:#0ea5e9; }
+    html.scheme-sunset[data-theme="light"] { --primary:#ea580c; --primary2:#c2410c; --accent:#db2777; }
+    html.scheme-forest[data-theme="light"] { --primary:#059669; --primary2:#047857; --accent:#10b981; }
+    html.scheme-rose[data-theme="light"]   { --primary:#d946ef; --primary2:#a21caf; --accent:#9333ea; }
+
+    /* ── Scheme pill bar ────────────────────────────────────── */
+    .scheme-pills {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .scheme-pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: transparent;
+      border: 1.5px solid var(--border);
+      border-radius: 100px;
+      padding: 6px 13px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+      transition: border-color .18s, color .18s, background .18s;
+      white-space: nowrap;
+    }
+    .scheme-pill:hover { border-color: var(--primary); color: var(--text); }
+    .scheme-pill.active { background: rgba(255,255,255,.07); border-color: var(--primary); color: var(--text); }
+    [data-theme="light"] .scheme-pill.active { background: rgba(0,0,0,.05); }
+    .scheme-swatch {
+      width: 12px; height: 12px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
@@ -140,18 +181,19 @@
       padding: 8px 28px 8px 10px;
       border-radius: 10px;
       border: 1px solid var(--border);
-      background: rgba(0,0,0,.22);
+      background: rgba(14,22,52,.92);
       color: var(--text);
       font-size: 13px;
       outline: none;
       appearance: none;
+      color-scheme: dark;
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23a7b1d6'/%3E%3C/svg%3E");
       background-repeat: no-repeat;
       background-position: right 10px center;
       cursor: pointer;
     }
-    select:focus { border-color: var(--primary); }
-    [data-theme="light"] select { background-color: rgba(255,255,255,.88); }
+    select:focus { border-color: var(--primary); outline: none; }
+    [data-theme="light"] select { background: #ffffff; color: #1a2142; color-scheme: light; border-color: rgba(0,0,0,.15); }
 
     .reset-btn {
       align-self: flex-end;
@@ -166,6 +208,76 @@
     }
     .reset-btn:hover { background: rgba(255,255,255,.08); color: var(--text); }
 
+    /* ── Settings panel ────────────────────────────────────── */
+    .settings-toggle {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      color: var(--muted);
+      user-select: none;
+      margin-top: 0;
+    }
+    .settings-toggle:hover { color: var(--text); }
+    .settings-toggle-arrow {
+      font-size: 10px;
+      transition: transform .2s;
+    }
+    .settings-toggle-arrow.open { transform: rotate(90deg); }
+
+    .settings-grid {
+      display: none;
+      grid-template-columns: repeat(4, minmax(0,1fr));
+      gap: 14px;
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border);
+    }
+    .settings-grid.open { display: grid; }
+    @media (max-width: 860px) { .settings-grid { grid-template-columns: 1fr 1fr; } }
+
+    .settings-field label {
+      display: block;
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .5px;
+      text-transform: uppercase;
+      margin-bottom: 5px;
+    }
+    .settings-field input[type="number"] {
+      width: 100%;
+      padding: 8px 10px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: rgba(0,0,0,.22);
+      color: var(--text);
+      font-size: 13px;
+      outline: none;
+    }
+    .settings-field input[type="number"]:focus { border-color: var(--primary); }
+    [data-theme="light"] .settings-field input[type="number"] { background: rgba(255,255,255,.88); }
+
+    .slider-wrap { display: flex; align-items: center; gap: 10px; }
+    .slider-wrap input[type="range"] {
+      flex: 1;
+      accent-color: var(--primary);
+      cursor: pointer;
+    }
+    .slider-val {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+      min-width: 38px;
+      text-align: right;
+    }
+    .settings-hint {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
     /* ── KPI Pills ─────────────────────────────────────────── */
     .kpi-row {
       display: grid;
@@ -174,6 +286,14 @@
     }
     @media (max-width: 1000px) { .kpi-row { grid-template-columns: repeat(3,1fr); } }
     @media (max-width: 560px)  { .kpi-row { grid-template-columns: 1fr 1fr; } }
+
+    .kpi-row-2 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+    @media (max-width: 860px)  { .kpi-row-2 { grid-template-columns: repeat(2,1fr); } }
+    @media (max-width: 560px)  { .kpi-row-2 { grid-template-columns: 1fr 1fr; } }
 
     .kpi-pill {
       background: var(--surface2);
@@ -205,6 +325,46 @@
     .kpi-pill.good .kpi-value { color: var(--good); }
     .kpi-pill.warn .kpi-value { color: var(--warn); }
     .kpi-pill.bad  .kpi-value { color: var(--bad);  }
+    .kpi-pill.accent { border-color: var(--accent); }
+    .kpi-pill.accent .kpi-value { color: var(--accent); }
+
+    /* delta badge */
+    .delta {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 6px;
+      margin-left: 6px;
+      vertical-align: middle;
+    }
+    .delta.up   { background: rgba(16,185,129,.15); color: var(--good); }
+    .delta.down { background: rgba(239,68,68,.15);  color: var(--bad);  }
+    .delta.flat { background: rgba(167,177,214,.1); color: var(--muted);}
+
+    /* target progress bar */
+    .target-bar-wrap {
+      margin-top: 8px;
+      display: none;
+    }
+    .target-bar-wrap.visible { display: block; }
+    .target-bar-track {
+      height: 4px;
+      background: rgba(255,255,255,.08);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+    .target-bar-fill {
+      height: 100%;
+      border-radius: 99px;
+      background: var(--primary);
+      transition: width .4s ease;
+    }
+    .target-bar-label {
+      font-size: 10px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
 
     /* ── Chart rows ────────────────────────────────────────── */
     .chart-row {
@@ -213,9 +373,11 @@
     }
     .chart-row-2-1 { grid-template-columns: 2fr 1fr; }
     .chart-row-1-2 { grid-template-columns: 1fr 2fr; }
+    .chart-row-1-1 { grid-template-columns: 1fr 1fr; }
     @media (max-width: 860px) {
       .chart-row-2-1,
-      .chart-row-1-2 { grid-template-columns: 1fr; }
+      .chart-row-1-2,
+      .chart-row-1-1 { grid-template-columns: 1fr; }
     }
 
     .chart-wrap {
@@ -227,6 +389,16 @@
       position: relative;
       height: 240px;
       margin-top: 14px;
+    }
+
+    /* section label */
+    .section-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .8px;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 4px 0 2px;
     }
 
     /* ── Loading ───────────────────────────────────────────── */
@@ -295,6 +467,23 @@
       <div class="brand-subtitle">Creator &amp; Ecommerce · Northwind Consulting</div>
     </div>
   </div>
+  <div class="scheme-pills">
+    <button class="scheme-pill active" data-scheme="creator" onclick="setScheme('creator',this)">
+      <span class="scheme-swatch" style="background:linear-gradient(135deg,#5a9fc2,#8b5cf6)"></span>Creator
+    </button>
+    <button class="scheme-pill" data-scheme="ocean" onclick="setScheme('ocean',this)">
+      <span class="scheme-swatch" style="background:linear-gradient(135deg,#0ea5e9,#22d3ee)"></span>Ocean
+    </button>
+    <button class="scheme-pill" data-scheme="sunset" onclick="setScheme('sunset',this)">
+      <span class="scheme-swatch" style="background:linear-gradient(135deg,#f97316,#ec4899)"></span>Sunset
+    </button>
+    <button class="scheme-pill" data-scheme="forest" onclick="setScheme('forest',this)">
+      <span class="scheme-swatch" style="background:linear-gradient(135deg,#10b981,#34d399)"></span>Forest
+    </button>
+    <button class="scheme-pill" data-scheme="rose" onclick="setScheme('rose',this)">
+      <span class="scheme-swatch" style="background:linear-gradient(135deg,#e879f9,#a855f7)"></span>Rose
+    </button>
+  </div>
   <div class="topbar-right">
     <button class="icon-btn" onclick="toggleTheme()">☀️ Light</button>
   </div>
@@ -347,27 +536,61 @@
       </div>
     </div>
 
-    <!-- KPI Row -->
+    <!-- Targets & Assumptions -->
+    <div class="card">
+      <div class="settings-toggle" onclick="toggleSettings()">
+        <span class="settings-toggle-arrow" id="settings-arrow">▶</span>
+        <span>⚙️ Targets &amp; Assumptions</span>
+        <span style="font-size:11px;color:var(--muted);margin-left:4px">— set revenue targets and margin assumptions</span>
+      </div>
+      <div class="settings-grid" id="settings-panel">
+        <div class="settings-field">
+          <label>Monthly Revenue Target ($)</label>
+          <input type="number" id="s-target" placeholder="e.g. 50000" min="0" oninput="saveSettings(); render()">
+          <div class="settings-hint">Shows attainment % on revenue KPI</div>
+        </div>
+        <div class="settings-field">
+          <label>Estimated COGS %</label>
+          <div class="slider-wrap">
+            <input type="range" id="s-cogs" min="0" max="80" step="1" value="35" oninput="updateCogsLabel(); saveSettings(); render()">
+            <span class="slider-val" id="s-cogs-val">35%</span>
+          </div>
+          <div class="settings-hint">Used to estimate gross profit &amp; margin</div>
+        </div>
+        <div class="settings-field">
+          <label>Avg Monthly Revenue (prior baseline)</label>
+          <input type="number" id="s-baseline" placeholder="e.g. 42000" min="0" oninput="saveSettings(); render()">
+          <div class="settings-hint">Used when prior-period data is unavailable</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- KPI Row 1 — Core revenue -->
+    <div class="section-label">Revenue Overview</div>
     <div class="kpi-row">
-      <div class="kpi-pill highlight">
+      <div class="kpi-pill highlight" id="kpi-rev-pill">
         <div class="kpi-label">Total Revenue</div>
         <div class="kpi-value" id="kpi-revenue">—</div>
-        <div class="kpi-sub">Gross order value</div>
+        <div class="kpi-sub" id="kpi-revenue-sub">Gross order value</div>
+        <div class="target-bar-wrap" id="target-bar-wrap">
+          <div class="target-bar-track"><div class="target-bar-fill" id="target-bar-fill"></div></div>
+          <div class="target-bar-label" id="target-bar-label"></div>
+        </div>
       </div>
       <div class="kpi-pill good">
         <div class="kpi-label">Net Sales</div>
         <div class="kpi-value" id="kpi-net">—</div>
-        <div class="kpi-sub">After refunds &amp; discounts</div>
+        <div class="kpi-sub" id="kpi-net-sub">After refunds &amp; discounts</div>
       </div>
       <div class="kpi-pill">
         <div class="kpi-label">Total Orders</div>
         <div class="kpi-value" id="kpi-orders">—</div>
-        <div class="kpi-sub">Transactions</div>
+        <div class="kpi-sub" id="kpi-orders-sub">Transactions</div>
       </div>
       <div class="kpi-pill">
         <div class="kpi-label">Avg Order Value</div>
         <div class="kpi-value" id="kpi-aov">—</div>
-        <div class="kpi-sub">Revenue / orders</div>
+        <div class="kpi-sub" id="kpi-aov-sub">Revenue / orders</div>
       </div>
       <div class="kpi-pill warn">
         <div class="kpi-label">Discount Rate</div>
@@ -381,6 +604,31 @@
       </div>
     </div>
 
+    <!-- KPI Row 2 — Profitability & Forecasting -->
+    <div class="section-label">Profitability &amp; Forecast</div>
+    <div class="kpi-row-2">
+      <div class="kpi-pill accent">
+        <div class="kpi-label">Est. Gross Profit</div>
+        <div class="kpi-value" id="kpi-profit">—</div>
+        <div class="kpi-sub" id="kpi-profit-sub">Net sales × (1 – COGS%)</div>
+      </div>
+      <div class="kpi-pill accent">
+        <div class="kpi-label">Est. Profit Margin</div>
+        <div class="kpi-value" id="kpi-margin">—</div>
+        <div class="kpi-sub">Gross profit / net sales</div>
+      </div>
+      <div class="kpi-pill" id="kpi-mom-pill">
+        <div class="kpi-label">Revenue vs Prior Period</div>
+        <div class="kpi-value" id="kpi-mom">—</div>
+        <div class="kpi-sub" id="kpi-mom-sub">Select a year or month to compare</div>
+      </div>
+      <div class="kpi-pill" id="kpi-forecast-pill">
+        <div class="kpi-label">Discount Recapture Opportunity</div>
+        <div class="kpi-value" id="kpi-forecast">—</div>
+        <div class="kpi-sub" id="kpi-forecast-sub">Revenue lost to discounts this period</div>
+      </div>
+    </div>
+
     <!-- Revenue Trend + Channel Mix -->
     <div class="chart-row chart-row-2-1">
       <div class="card">
@@ -389,6 +637,7 @@
         <div class="legend-row">
           <div class="legend-item"><div class="legend-dot" style="background:#5a9fc2"></div>Total Revenue</div>
           <div class="legend-item"><div class="legend-dot" style="background:#10b981"></div>Net Sales</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#8b5cf6"></div>Est. Gross Profit</div>
         </div>
         <div class="chart-wrap"><canvas id="chart-trend"></canvas></div>
       </div>
@@ -413,18 +662,35 @@
       </div>
     </div>
 
+    <!-- Discount Intelligence + Channel Efficiency -->
+    <div class="chart-row chart-row-1-1">
+      <div class="card">
+        <div class="card-title">Discount Intelligence</div>
+        <div class="card-subtitle">Avg discount % by campaign — how deep are you discounting per campaign?</div>
+        <div class="chart-wrap"><canvas id="chart-discount-depth"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Channel Efficiency</div>
+        <div class="card-subtitle">Avg order value by UTM source — which channels send your highest-value buyers?</div>
+        <div class="chart-wrap"><canvas id="chart-channel-aov"></canvas></div>
+      </div>
+    </div>
+
   </div><!-- /container -->
 </div><!-- /dashboard -->
 
 <script>
 // ── State ──────────────────────────────────────────────────────────────────────
-let allRows  = [];
-let charts   = {};
+let allRows = [];
+let charts  = {};
 
 // ── Boot ───────────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   const saved = localStorage.getItem('rev-theme');
   if (saved) applyTheme(saved);
+  const savedScheme = localStorage.getItem('rev-scheme') || 'creator';
+  setScheme(savedScheme);
+  loadSettings();
 
   google.script.run
     .withSuccessHandler(onData)
@@ -447,9 +713,46 @@ function onError(e) {
   el.textContent = 'Error loading data: ' + (e.message || String(e));
 }
 
+// ── Settings ───────────────────────────────────────────────────────────────────
+function loadSettings() {
+  const target   = localStorage.getItem('rev-target')   || '';
+  const cogs     = localStorage.getItem('rev-cogs')     || '35';
+  const baseline = localStorage.getItem('rev-baseline') || '';
+
+  document.getElementById('s-target').value   = target;
+  document.getElementById('s-cogs').value     = cogs;
+  document.getElementById('s-baseline').value = baseline;
+  document.getElementById('s-cogs-val').textContent = cogs + '%';
+}
+
+function saveSettings() {
+  localStorage.setItem('rev-target',   document.getElementById('s-target').value);
+  localStorage.setItem('rev-cogs',     document.getElementById('s-cogs').value);
+  localStorage.setItem('rev-baseline', document.getElementById('s-baseline').value);
+}
+
+function updateCogsLabel() {
+  document.getElementById('s-cogs-val').textContent = document.getElementById('s-cogs').value + '%';
+}
+
+function toggleSettings() {
+  const panel = document.getElementById('settings-panel');
+  const arrow = document.getElementById('settings-arrow');
+  const open  = panel.classList.toggle('open');
+  arrow.classList.toggle('open', open);
+}
+
+function getSettings() {
+  return {
+    target:   parseFloat(document.getElementById('s-target').value)   || 0,
+    cogs:     parseFloat(document.getElementById('s-cogs').value)     / 100 || 0.35,
+    baseline: parseFloat(document.getElementById('s-baseline').value) || 0,
+  };
+}
+
 // ── Filters ────────────────────────────────────────────────────────────────────
 function populateFilters(fo) {
-  const sel = (id, items, labelFn) => {
+  const sel = (id, items) => {
     const el = document.getElementById(id);
     items.forEach(item => {
       const opt = document.createElement('option');
@@ -492,18 +795,49 @@ function filteredRows() {
   );
 }
 
+// ── Prior period rows ──────────────────────────────────────────────────────────
+function priorPeriodRows() {
+  const f = getFilters();
+  if (!f.year && !f.month) return null;
+
+  let priorYear  = f.year  || '';
+  let priorMonth = f.month || '';
+
+  if (f.month && f.year) {
+    let m = parseInt(f.month), y = parseInt(f.year);
+    m--;
+    if (m === 0) { m = 12; y--; }
+    priorMonth = String(m).padStart(2, '0');
+    priorYear  = String(y);
+  } else if (f.year) {
+    priorYear  = String(parseInt(f.year) - 1);
+    priorMonth = '';
+  }
+
+  return allRows.filter(r =>
+    r.yr === priorYear &&
+    (!priorMonth || r.mo === priorMonth) &&
+    (!f.status   || r.finStatus === f.status) &&
+    (!f.source   || r.src       === f.source)
+  );
+}
+
 // ── Render ─────────────────────────────────────────────────────────────────────
 function render() {
-  const rows = filteredRows();
+  const rows     = filteredRows();
+  const prior    = priorPeriodRows();
+  const settings = getSettings();
+  const f        = getFilters();
 
-  // ── KPIs ──────────────────────────────────────────────────
+  // ── Aggregate current period ───────────────────────────────
   let totRev = 0, totNet = 0, totDisc = 0, totRef = 0;
   rows.forEach(r => { totRev += r.total; totNet += r.net; totDisc += r.disc; totRef += r.ref; });
-  const orders  = rows.length;
-  const aov     = orders > 0 ? totRev / orders : 0;
+  const orders   = rows.length;
+  const aov      = orders > 0 ? totRev / orders : 0;
   const discRate = totRev > 0 ? totDisc / totRev * 100 : 0;
   const refRate  = totRev > 0 ? totRef  / totRev * 100 : 0;
 
+  // ── KPI Row 1 ──────────────────────────────────────────────
   document.getElementById('kpi-revenue').textContent = fmt$(totRev);
   document.getElementById('kpi-net').textContent     = fmt$(totNet);
   document.getElementById('kpi-orders').textContent  = fmtN(orders);
@@ -511,48 +845,118 @@ function render() {
   document.getElementById('kpi-disc').textContent    = discRate.toFixed(1) + '%';
   document.getElementById('kpi-ref').textContent     = refRate.toFixed(1) + '%';
 
-  // Color refund pill based on value
   const refPill = document.getElementById('kpi-ref-pill');
   refPill.classList.remove('good','warn','bad');
-  if (refRate < 2)       refPill.classList.add('good');
-  else if (refRate < 5)  refPill.classList.add('warn');
-  else                   refPill.classList.add('bad');
+  if      (refRate < 2) refPill.classList.add('good');
+  else if (refRate < 5) refPill.classList.add('warn');
+  else                  refPill.classList.add('bad');
 
-  // ── Monthly trend ──────────────────────────────────────────
+  // ── Target progress bar ────────────────────────────────────
+  const targetWrap = document.getElementById('target-bar-wrap');
+  if (settings.target > 0 && (f.year || f.month)) {
+    const pct = Math.min(totRev / settings.target * 100, 100);
+    document.getElementById('target-bar-fill').style.width = pct.toFixed(1) + '%';
+    document.getElementById('target-bar-fill').style.background =
+      pct >= 100 ? 'var(--good)' : pct >= 75 ? 'var(--warn)' : 'var(--primary)';
+    document.getElementById('target-bar-label').textContent =
+      pct.toFixed(1) + '% of $' + settings.target.toLocaleString() + ' target';
+    targetWrap.classList.add('visible');
+  } else {
+    targetWrap.classList.remove('visible');
+  }
+
+  // ── MoM delta badges ──────────────────────────────────────
+  if (prior && prior.length > 0) {
+    let priorRev = 0, priorNet = 0, priorOrders = prior.length, priorDisc = 0;
+    prior.forEach(r => { priorRev += r.total; priorNet += r.net; priorDisc += r.disc; });
+    const priorAov = priorOrders > 0 ? priorRev / priorOrders : 0;
+
+    setDelta('kpi-revenue-sub', totRev,    priorRev,    'vs prior period');
+    setDelta('kpi-net-sub',     totNet,    priorNet,    'vs prior period');
+    setDelta('kpi-orders-sub',  orders,    priorOrders, 'vs prior period');
+    setDelta('kpi-aov-sub',     aov,       priorAov,    'vs prior period');
+  } else {
+    ['kpi-revenue-sub','kpi-net-sub','kpi-orders-sub','kpi-aov-sub'].forEach(id => {
+      const el = document.getElementById(id);
+      const base = { 'kpi-revenue-sub':'Gross order value','kpi-net-sub':'After refunds & discounts',
+                     'kpi-orders-sub':'Transactions','kpi-aov-sub':'Revenue / orders' };
+      el.textContent = base[id] || '';
+    });
+  }
+
+  // ── KPI Row 2 — Profitability ──────────────────────────────
+  const grossProfit = totNet * (1 - settings.cogs);
+  const margin      = totNet > 0 ? grossProfit / totNet * 100 : 0;
+  document.getElementById('kpi-profit').textContent     = fmt$(grossProfit);
+  document.getElementById('kpi-margin').textContent     = margin.toFixed(1) + '%';
+  document.getElementById('kpi-profit-sub').textContent = `At ${Math.round(settings.cogs * 100)}% est. COGS`;
+
+  // ── MoM Revenue change ────────────────────────────────────
+  const momPill = document.getElementById('kpi-mom-pill');
+  const momEl   = document.getElementById('kpi-mom');
+  const momSub  = document.getElementById('kpi-mom-sub');
+
+  if (prior && prior.length > 0) {
+    let priorRev = 0; prior.forEach(r => priorRev += r.total);
+    const momPct = priorRev > 0 ? (totRev - priorRev) / priorRev * 100 : null;
+    if (momPct !== null) {
+      momEl.textContent = (momPct >= 0 ? '+' : '') + momPct.toFixed(1) + '%';
+      momEl.style.color = momPct >= 0 ? 'var(--good)' : 'var(--bad)';
+      momSub.textContent = `${fmt$(totRev)} vs ${fmt$(priorRev)} prior period`;
+    }
+  } else if (settings.baseline > 0 && (f.year || f.month)) {
+    const momPct = (totRev - settings.baseline) / settings.baseline * 100;
+    momEl.textContent = (momPct >= 0 ? '+' : '') + momPct.toFixed(1) + '%';
+    momEl.style.color = momPct >= 0 ? 'var(--good)' : 'var(--bad)';
+    momSub.textContent = `vs $${settings.baseline.toLocaleString()} baseline`;
+  } else {
+    momEl.textContent  = '—';
+    momEl.style.color  = '';
+    momSub.textContent = 'Select a year or month to compare';
+  }
+
+  // ── Discount recapture opportunity ────────────────────────
+  document.getElementById('kpi-forecast').textContent     = fmt$(totDisc);
+  document.getElementById('kpi-forecast-sub').textContent =
+    totDisc > 0
+      ? `${discRate.toFixed(1)}% of revenue given in discounts`
+      : 'No discounts in this period';
+
+  // ── Monthly trend (with gross profit line) ─────────────────
   const monthlyMap = {};
   rows.forEach(r => {
     if (!r.mKey) return;
-    if (!monthlyMap[r.mKey]) monthlyMap[r.mKey] = { label: r.mLabel, rev: 0, net: 0 };
-    monthlyMap[r.mKey].rev += r.total;
-    monthlyMap[r.mKey].net += r.net;
+    if (!monthlyMap[r.mKey]) monthlyMap[r.mKey] = { label: r.mLabel, rev: 0, net: 0, disc: 0 };
+    monthlyMap[r.mKey].rev  += r.total;
+    monthlyMap[r.mKey].net  += r.net;
+    monthlyMap[r.mKey].disc += r.disc;
   });
-  const sorted    = Object.entries(monthlyMap).sort(([a],[b]) => a.localeCompare(b));
-  const tLabels   = sorted.map(([,v]) => v.label);
-  const tRevData  = sorted.map(([,v]) => +v.rev.toFixed(2));
-  const tNetData  = sorted.map(([,v]) => +v.net.toFixed(2));
+  const sorted   = Object.entries(monthlyMap).sort(([a],[b]) => a.localeCompare(b));
+  const tLabels  = sorted.map(([,v]) => v.label);
+  const tRevData = sorted.map(([,v]) => +v.rev.toFixed(2));
+  const tNetData = sorted.map(([,v]) => +v.net.toFixed(2));
+  const tProfData= sorted.map(([,v]) => +(v.net * (1 - settings.cogs)).toFixed(2));
 
+  const sc = SCHEMES[currentScheme];
   renderChart('chart-trend', 'bar', tLabels, [
-    { label: 'Total Revenue', data: tRevData, backgroundColor: 'rgba(90,159,194,.70)', borderColor: '#5a9fc2', borderWidth: 1.5, borderRadius: 4 },
-    { label: 'Net Sales',     data: tNetData, type: 'line', borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,.12)', borderWidth: 2, pointRadius: 3, tension: .35, fill: true },
+    { label: 'Total Revenue',    data: tRevData,  backgroundColor: hexAlpha(sc.c1,.70), borderColor: sc.c1, borderWidth: 1.5, borderRadius: 4 },
+    { label: 'Net Sales',        data: tNetData,  type: 'line', borderColor: sc.c3, backgroundColor: hexAlpha(sc.c3,.12), borderWidth: 2, pointRadius: 3, tension: .35, fill: true },
+    { label: 'Est. Gross Profit',data: tProfData, type: 'line', borderColor: sc.c2, backgroundColor: 'transparent', borderWidth: 2, pointRadius: 3, tension: .35, borderDash: [4,3] },
   ], { y: { title: 'Revenue ($)' } });
 
   // ── Channel mix ────────────────────────────────────────────
   const srcMap = {};
-  rows.forEach(r => {
-    srcMap[r.src] = (srcMap[r.src] || 0) + r.net;
-  });
+  rows.forEach(r => { srcMap[r.src] = (srcMap[r.src] || 0) + r.net; });
   const srcEntries = Object.entries(srcMap).sort(([,a],[,b]) => b - a);
   renderChart('chart-channel', 'doughnut', srcEntries.map(([k]) => k), [
     { data: srcEntries.map(([,v]) => +v.toFixed(2)),
-      backgroundColor: PALETTE.slice(0, srcEntries.length),
+      backgroundColor: SCHEMES[currentScheme].palette.slice(0, srcEntries.length),
       borderColor: 'transparent', hoverOffset: 6 }
   ], { legend: true });
 
   // ── Financial status ───────────────────────────────────────
   const statusMap = {};
-  rows.forEach(r => {
-    statusMap[r.finStatus] = (statusMap[r.finStatus] || 0) + 1;
-  });
+  rows.forEach(r => { statusMap[r.finStatus] = (statusMap[r.finStatus] || 0) + 1; });
   const statusEntries = Object.entries(statusMap).sort(([,a],[,b]) => b - a);
   const statusColors  = statusEntries.map(([k]) =>
     k === 'paid'     ? '#10b981' :
@@ -568,35 +972,99 @@ function render() {
 
   // ── Top campaigns ──────────────────────────────────────────
   const campMap = {};
-  rows.forEach(r => {
-    campMap[r.camp] = (campMap[r.camp] || 0) + r.net;
-  });
+  rows.forEach(r => { campMap[r.camp] = (campMap[r.camp] || 0) + r.net; });
   const campEntries = Object.entries(campMap)
     .filter(([k]) => k !== '(none)')
     .sort(([,a],[,b]) => b - a)
     .slice(0, 10);
   renderChart('chart-campaigns', 'bar', campEntries.map(([k]) => k), [
     { label: 'Net Sales', data: campEntries.map(([,v]) => +v.toFixed(2)),
-      backgroundColor: campEntries.map((_, i) => PALETTE[i % PALETTE.length]),
+      backgroundColor: campEntries.map((_, i) => SCHEMES[currentScheme].palette[i % SCHEMES[currentScheme].palette.length]),
       borderRadius: 4, borderSkipped: false }
   ], { indexAxis: 'y', x: { title: 'Net Sales ($)' } });
+
+  // ── Discount Intelligence ──────────────────────────────────
+  // avg discount % = avg(disc/total) per campaign, exclude (none) and zero-discount
+  const discCampMap = {};
+  rows.forEach(r => {
+    if (r.camp === '(none)' || r.total === 0) return;
+    const pct = r.disc / r.total * 100;
+    if (pct === 0) return;
+    if (!discCampMap[r.camp]) discCampMap[r.camp] = { sum: 0, count: 0 };
+    discCampMap[r.camp].sum   += pct;
+    discCampMap[r.camp].count += 1;
+  });
+  const discEntries = Object.entries(discCampMap)
+    .map(([k, v]) => [k, v.sum / v.count])
+    .sort(([,a],[,b]) => b - a)
+    .slice(0, 8);
+  if (discEntries.length > 0) {
+    renderChart('chart-discount-depth', 'bar', discEntries.map(([k]) => k), [
+      { label: 'Avg Discount %',
+        data: discEntries.map(([,v]) => +v.toFixed(1)),
+        backgroundColor: discEntries.map(([,v]) =>
+          v > 20 ? 'rgba(239,68,68,.75)' : v > 10 ? 'rgba(245,158,11,.75)' : 'rgba(16,185,129,.75)'
+        ),
+        borderRadius: 4, borderSkipped: false }
+    ], { indexAxis: 'y', x: { title: 'Avg Discount %' }, valueLabel: 'pct' });
+  }
+
+  // ── Channel Efficiency (AOV by source) ────────────────────
+  const aovSrcMap = {};
+  rows.forEach(r => {
+    if (!aovSrcMap[r.src]) aovSrcMap[r.src] = { rev: 0, count: 0 };
+    aovSrcMap[r.src].rev   += r.total;
+    aovSrcMap[r.src].count += 1;
+  });
+  const aovEntries = Object.entries(aovSrcMap)
+    .map(([k, v]) => [k, v.count > 0 ? v.rev / v.count : 0])
+    .sort(([,a],[,b]) => b - a);
+  renderChart('chart-channel-aov', 'bar', aovEntries.map(([k]) => k), [
+    { label: 'Avg Order Value ($)',
+      data: aovEntries.map(([,v]) => +v.toFixed(2)),
+      backgroundColor: aovEntries.map((_, i) => SCHEMES[currentScheme].palette[i % SCHEMES[currentScheme].palette.length]),
+      borderRadius: 4, borderSkipped: false }
+  ], { indexAxis: 'y', x: { title: 'Avg Order Value ($)' } });
 }
 
+// ── Delta badge helper ─────────────────────────────────────────────────────────
+function setDelta(subId, current, prior, label) {
+  const el = document.getElementById(subId);
+  if (prior === 0) { el.textContent = label; return; }
+  const pct = (current - prior) / prior * 100;
+  const dir = pct > 0.5 ? 'up' : pct < -0.5 ? 'down' : 'flat';
+  const sign = pct >= 0 ? '+' : '';
+  el.innerHTML = `${label} <span class="delta ${dir}">${sign}${pct.toFixed(1)}%</span>`;
+}
 
 // ── Chart helpers ──────────────────────────────────────────────────────────────
-const PALETTE = [
-  '#5a9fc2','#8b5cf6','#10b981','#f59e0b','#ef4444',
-  '#06b6d4','#ec4899','#84cc16','#f97316','#a78bfa',
-];
+const SCHEMES = {
+  creator: { c1:'#5a9fc2', c2:'#8b5cf6', c3:'#10b981',
+    palette:['#5a9fc2','#8b5cf6','#10b981','#f59e0b','#ef4444','#06b6d4','#ec4899','#84cc16','#f97316','#a78bfa'] },
+  ocean:   { c1:'#0ea5e9', c2:'#22d3ee', c3:'#06b6d4',
+    palette:['#0ea5e9','#22d3ee','#06b6d4','#38bdf8','#0284c7','#7dd3fc','#60a5fa','#93c5fd','#bae6fd','#0c4a6e'] },
+  sunset:  { c1:'#f97316', c2:'#ec4899', c3:'#f59e0b',
+    palette:['#f97316','#ec4899','#f59e0b','#ef4444','#a855f7','#fb923c','#f472b6','#fbbf24','#fca5a5','#e879f9'] },
+  forest:  { c1:'#10b981', c2:'#34d399', c3:'#6ee7b7',
+    palette:['#10b981','#34d399','#6ee7b7','#059669','#84cc16','#4ade80','#a3e635','#86efac','#65a30d','#047857'] },
+  rose:    { c1:'#e879f9', c2:'#a855f7', c3:'#818cf8',
+    palette:['#e879f9','#a855f7','#818cf8','#ec4899','#f0abfc','#c084fc','#f9a8d4','#d8b4fe','#9333ea','#7c3aed'] },
+};
+let currentScheme = 'creator';
+
+function hexAlpha(hex, a) {
+  const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+  return `rgba(${r},${g},${b},${a})`;
+}
 
 function renderChart(id, type, labels, datasets, opts = {}) {
-  const isDark = document.documentElement.getAttribute('data-theme') !== 'light';
+  const isDark    = document.documentElement.getAttribute('data-theme') !== 'light';
   const textColor = isDark ? '#a7b1d6' : '#5c6690';
   const gridColor = isDark ? 'rgba(255,255,255,.06)' : 'rgba(0,0,0,.06)';
 
   if (charts[id]) { charts[id].destroy(); delete charts[id]; }
 
-  const ctx  = document.getElementById(id).getContext('2d');
+  const ctx        = document.getElementById(id).getContext('2d');
   const isDoughnut = type === 'doughnut';
 
   const scaleDefaults = {
@@ -635,6 +1103,7 @@ function renderChart(id, type, labels, datasets, opts = {}) {
             label: ctx => {
               const val = ctx.parsed.y ?? ctx.parsed.x ?? ctx.parsed;
               if (opts.valueLabel === 'orders') return ` ${val} orders`;
+              if (opts.valueLabel === 'pct')    return ` ${val}%`;
               return ` $${Number(val).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
             },
           },
@@ -645,6 +1114,23 @@ function renderChart(id, type, labels, datasets, opts = {}) {
   });
 }
 
+// ── Scheme ─────────────────────────────────────────────────────────────────────
+function setScheme(scheme, btn) {
+  currentScheme = scheme in SCHEMES ? scheme : 'creator';
+  document.querySelectorAll('.scheme-pill').forEach(p => p.classList.remove('active'));
+  const target = btn || document.querySelector(`[data-scheme="${currentScheme}"]`);
+  if (target) target.classList.add('active');
+  const html = document.documentElement;
+  html.className = html.className.replace(/\bscheme-\w+/g, '').trim();
+  if (currentScheme !== 'creator') html.classList.add('scheme-' + currentScheme);
+  // Update body background gradient colours dynamically
+  const sc = SCHEMES[currentScheme];
+  let bgEl = document.getElementById('scheme-bg-style');
+  if (!bgEl) { bgEl = document.createElement('style'); bgEl.id = 'scheme-bg-style'; document.head.appendChild(bgEl); }
+  bgEl.textContent = `body{background:radial-gradient(1200px 700px at 15% 0%,${hexAlpha(sc.c1,.18)},transparent 60%),radial-gradient(900px 600px at 85% 5%,${hexAlpha(sc.c2,.12)},transparent 55%),var(--bg)!important}[data-theme="light"] body{background:radial-gradient(1200px 700px at 15% 0%,${hexAlpha(sc.c1,.07)},transparent 60%),radial-gradient(900px 600px at 85% 5%,${hexAlpha(sc.c2,.05)},transparent 55%),var(--bg)!important}`;
+  localStorage.setItem('rev-scheme', currentScheme);
+  if (allRows.length > 0) render();
+}
 
 // ── Theme ──────────────────────────────────────────────────────────────────────
 function toggleTheme() {
@@ -656,10 +1142,8 @@ function applyTheme(theme) {
   document.documentElement.setAttribute('data-theme', theme === 'light' ? 'light' : '');
   document.querySelector('.icon-btn').textContent = theme === 'light' ? '🌙 Dark' : '☀️ Light';
   localStorage.setItem('rev-theme', theme);
-  // Re-render charts with correct colors
   if (allRows.length > 0) render();
 }
-
 
 // ── Formatters ─────────────────────────────────────────────────────────────────
 function fmt$(n) {
