@@ -41,19 +41,19 @@
     }
 
     /* ── Colour schemes ─────────────────────────────────────── */
-    html.scheme-creator { --primary:#a855f7; --primary2:#7c3aed; --accent:#06b6d4; }
-    html.scheme-slate   { --primary:#78909c; --primary2:#546e7a; --accent:#90a4ae; }
-    html.scheme-creator[data-theme="light"] { --primary:#7c3aed; --primary2:#6d28d9; --accent:#0284c7; }
-    html.scheme-slate[data-theme="light"]   { --primary:#546e7a; --primary2:#37474f; --accent:#607d8b; }
-    html.scheme-ocean   { --primary:#0ea5e9; --primary2:#0284c7; --accent:#22d3ee; }
-    html.scheme-sunset  { --primary:#f97316; --primary2:#ea580c; --accent:#ec4899; }
-    html.scheme-forest  { --primary:#10b981; --primary2:#059669; --accent:#34d399; }
-    html.scheme-rose    { --primary:#e879f9; --primary2:#d946ef; --accent:#a855f7; }
-    html.scheme-creator[data-theme="light"] { --primary:#7c3aed; --primary2:#6d28d9; --accent:#0284c7; }
-    html.scheme-ocean[data-theme="light"]  { --primary:#0284c7; --primary2:#0369a1; --accent:#0ea5e9; }
-    html.scheme-sunset[data-theme="light"] { --primary:#ea580c; --primary2:#c2410c; --accent:#db2777; }
-    html.scheme-forest[data-theme="light"] { --primary:#059669; --primary2:#047857; --accent:#10b981; }
-    html.scheme-rose[data-theme="light"]   { --primary:#d946ef; --primary2:#a21caf; --accent:#9333ea; }
+    /* Each scheme sets primary (revenue), accent (profit), warn (watch metrics) */
+    html.scheme-creator { --primary:#a855f7; --primary2:#7c3aed; --accent:#06b6d4; --warn:#f59e0b; }
+    html.scheme-slate   { --primary:#78909c; --primary2:#546e7a; --accent:#90a4ae; --warn:#f59e0b; }
+    html.scheme-ocean   { --primary:#0ea5e9; --primary2:#0284c7; --accent:#22d3ee; --warn:#f97316; }
+    html.scheme-sunset  { --primary:#f97316; --primary2:#ea580c; --accent:#ec4899; --warn:#8b5cf6; }
+    html.scheme-forest  { --primary:#10b981; --primary2:#059669; --accent:#34d399; --warn:#fbbf24; }
+    html.scheme-rose    { --primary:#e879f9; --primary2:#d946ef; --accent:#a855f7; --warn:#f59e0b; }
+    html.scheme-creator[data-theme="light"] { --primary:#7c3aed; --primary2:#6d28d9; --accent:#0284c7; --warn:#d97706; }
+    html.scheme-slate[data-theme="light"]   { --primary:#546e7a; --primary2:#37474f; --accent:#607d8b; --warn:#d97706; }
+    html.scheme-ocean[data-theme="light"]  { --primary:#0284c7; --primary2:#0369a1; --accent:#0ea5e9; --warn:#ea580c; }
+    html.scheme-sunset[data-theme="light"] { --primary:#ea580c; --primary2:#c2410c; --accent:#db2777; --warn:#7c3aed; }
+    html.scheme-forest[data-theme="light"] { --primary:#059669; --primary2:#047857; --accent:#10b981; --warn:#d97706; }
+    html.scheme-rose[data-theme="light"]   { --primary:#d946ef; --primary2:#a21caf; --accent:#9333ea; --warn:#d97706; }
 
     /* ── Scheme pill bar ────────────────────────────────────── */
     .scheme-pills {
