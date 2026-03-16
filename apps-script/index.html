@@ -378,6 +378,69 @@
       margin-top: 4px;
     }
 
+    /* ── Pace badges ────────────────────────────────────────── */
+    .pace-badge {
+      display: none;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .4px;
+      padding: 2px 8px;
+      border-radius: 99px;
+      margin-top: 6px;
+      width: fit-content;
+    }
+    .pace-badge.visible       { display: inline-block; }
+    .pace-ahead               { background: rgba(16,185,129,.18);  color: var(--good);    }
+    .pace-on-track            { background: rgba(90,159,194,.18);  color: var(--primary); }
+    .pace-watch               { background: rgba(245,158,11,.18);  color: var(--warn);    }
+    .pace-behind              { background: rgba(239,68,68,.18);   color: var(--bad);     }
+
+    /* ── Forecast card ──────────────────────────────────────── */
+    #forecast-card { display: none; }
+    #forecast-card.visible { display: block; }
+    .forecast-body {
+      display: flex;
+      align-items: flex-start;
+      gap: 24px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+    .forecast-projected {
+      flex-shrink: 0;
+    }
+    .forecast-projected-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .5px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+    .forecast-projected-value {
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--accent);
+      line-height: 1;
+    }
+    .forecast-projected-sub {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+    .forecast-sentence {
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--text);
+      flex: 1;
+      min-width: 220px;
+      padding-top: 2px;
+    }
+    .forecast-meta {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
     /* ── Chart rows ────────────────────────────────────────── */
     .chart-row {
       display: grid;
@@ -551,18 +614,37 @@
       </div>
     </div>
 
-    <!-- Targets & Assumptions -->
+    <!-- Goals, Targets & Assumptions -->
     <div class="card">
       <div class="settings-toggle" onclick="toggleSettings()">
         <span class="settings-toggle-arrow" id="settings-arrow">▶</span>
-        <span>⚙️ Targets &amp; Assumptions</span>
-        <span style="font-size:11px;color:var(--muted);margin-left:4px">— set revenue targets and margin assumptions</span>
+        <span>🎯 Goals, Targets &amp; Assumptions</span>
+        <span style="font-size:11px;color:var(--muted);margin-left:4px">— set goals and margin assumptions; pace indicators update automatically</span>
       </div>
       <div class="settings-grid" id="settings-panel">
         <div class="settings-field">
-          <label>Monthly Revenue Target ($)</label>
+          <label>Timeframe</label>
+          <select id="s-timeframe" onchange="saveSettings(); render()" style="width:100%;padding:8px 28px 8px 10px;border-radius:10px;border:1px solid var(--border);background:rgba(14,22,52,.92);color:var(--text);font-size:13px;outline:none;appearance:none;color-scheme:dark;background-image:url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23a7b1d6'/%3E%3C/svg%3E\");background-repeat:no-repeat;background-position:right 10px center;cursor:pointer;">
+            <option value="monthly">Monthly</option>
+            <option value="quarterly">Quarterly</option>
+            <option value="annual">Annual</option>
+          </select>
+          <div class="settings-hint">Applies to all goal attainment &amp; pace</div>
+        </div>
+        <div class="settings-field">
+          <label>Revenue Target ($)</label>
           <input type="number" id="s-target" placeholder="e.g. 50000" min="0" oninput="saveSettings(); render()">
-          <div class="settings-hint">Shows attainment % on revenue KPI</div>
+          <div class="settings-hint">Shows attainment % and pace on Revenue KPI</div>
+        </div>
+        <div class="settings-field">
+          <label>Orders Target (#)</label>
+          <input type="number" id="s-orders-target" placeholder="e.g. 400" min="0" oninput="saveSettings(); render()">
+          <div class="settings-hint">Optional — shows goal bar on Orders KPI</div>
+        </div>
+        <div class="settings-field">
+          <label>AOV Target ($)</label>
+          <input type="number" id="s-aov-target" placeholder="e.g. 125" min="0" oninput="saveSettings(); render()">
+          <div class="settings-hint">Optional — shows goal badge on AOV KPI</div>
         </div>
         <div class="settings-field">
           <label>Estimated COGS %</label>
@@ -591,6 +673,7 @@
           <div class="target-bar-track"><div class="target-bar-fill" id="target-bar-fill"></div></div>
           <div class="target-bar-label" id="target-bar-label"></div>
         </div>
+        <div class="pace-badge" id="pace-revenue"></div>
       </div>
       <div class="kpi-pill highlight">
         <div class="kpi-label">Net Sales</div>
@@ -601,11 +684,17 @@
         <div class="kpi-label">Total Orders</div>
         <div class="kpi-value" id="kpi-orders">—</div>
         <div class="kpi-sub" id="kpi-orders-sub">Transactions</div>
+        <div class="target-bar-wrap" id="orders-bar-wrap">
+          <div class="target-bar-track"><div class="target-bar-fill" id="orders-bar-fill"></div></div>
+          <div class="target-bar-label" id="orders-bar-label"></div>
+        </div>
+        <div class="pace-badge" id="pace-orders"></div>
       </div>
       <div class="kpi-pill highlight">
         <div class="kpi-label">Avg Order Value</div>
         <div class="kpi-value" id="kpi-aov">—</div>
         <div class="kpi-sub" id="kpi-aov-sub">Revenue / orders</div>
+        <div class="pace-badge" id="pace-aov"></div>
       </div>
       <div class="kpi-pill warn">
         <div class="kpi-label">Discount Rate</div>
@@ -644,6 +733,22 @@
       </div>
     </div>
 
+    <!-- Forecast Card -->
+    <div class="section-label">Revenue Forecast</div>
+    <div class="card" id="forecast-card">
+      <div class="forecast-body">
+        <div class="forecast-projected">
+          <div class="forecast-projected-label">Projected End-of-Period Revenue</div>
+          <div class="forecast-projected-value" id="forecast-projected-value">—</div>
+          <div class="forecast-projected-sub" id="forecast-projected-sub"></div>
+        </div>
+        <div>
+          <div class="forecast-sentence" id="forecast-sentence">—</div>
+          <div class="forecast-meta" id="forecast-meta"></div>
+        </div>
+      </div>
+    </div>
+
     <!-- Revenue Trend + Channel Mix -->
     <div class="chart-row chart-row-2-1">
       <div class="card">
@@ -653,6 +758,7 @@
           <div class="legend-item"><div class="legend-dot" style="background:#5a9fc2"></div>Total Revenue</div>
           <div class="legend-item"><div class="legend-dot" style="background:#10b981"></div>Net Sales</div>
           <div class="legend-item"><div class="legend-dot" style="background:#8b5cf6"></div>Est. Gross Profit</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#f59e0b;border:2px dashed #f59e0b;background:transparent;width:18px;height:0;border-radius:0;border-width:0 0 2px;border-style:dashed"></div>Projected</div>
         </div>
         <div class="chart-wrap"><canvas id="chart-trend"></canvas></div>
       </div>
@@ -731,20 +837,29 @@ function onError(e) {
 
 // ── Settings ───────────────────────────────────────────────────────────────────
 function loadSettings() {
-  const target   = localStorage.getItem('rev-target')   || '';
-  const cogs     = localStorage.getItem('rev-cogs')     || '35';
-  const baseline = localStorage.getItem('rev-baseline') || '';
+  const target        = localStorage.getItem('rev-target')        || '';
+  const cogs          = localStorage.getItem('rev-cogs')          || '35';
+  const baseline      = localStorage.getItem('rev-baseline')      || '';
+  const ordersTarget  = localStorage.getItem('rev-orders-target') || '';
+  const aovTarget     = localStorage.getItem('rev-aov-target')    || '';
+  const timeframe     = localStorage.getItem('rev-timeframe')     || 'monthly';
 
-  document.getElementById('s-target').value   = target;
-  document.getElementById('s-cogs').value     = cogs;
-  document.getElementById('s-baseline').value = baseline;
+  document.getElementById('s-target').value        = target;
+  document.getElementById('s-cogs').value          = cogs;
+  document.getElementById('s-baseline').value      = baseline;
+  document.getElementById('s-orders-target').value = ordersTarget;
+  document.getElementById('s-aov-target').value    = aovTarget;
+  document.getElementById('s-timeframe').value     = timeframe;
   document.getElementById('s-cogs-val').textContent = cogs + '%';
 }
 
 function saveSettings() {
-  localStorage.setItem('rev-target',   document.getElementById('s-target').value);
-  localStorage.setItem('rev-cogs',     document.getElementById('s-cogs').value);
-  localStorage.setItem('rev-baseline', document.getElementById('s-baseline').value);
+  localStorage.setItem('rev-target',        document.getElementById('s-target').value);
+  localStorage.setItem('rev-cogs',          document.getElementById('s-cogs').value);
+  localStorage.setItem('rev-baseline',      document.getElementById('s-baseline').value);
+  localStorage.setItem('rev-orders-target', document.getElementById('s-orders-target').value);
+  localStorage.setItem('rev-aov-target',    document.getElementById('s-aov-target').value);
+  localStorage.setItem('rev-timeframe',     document.getElementById('s-timeframe').value);
 }
 
 function updateCogsLabel() {
@@ -760,9 +875,12 @@ function toggleSettings() {
 
 function getSettings() {
   return {
-    target:   parseFloat(document.getElementById('s-target').value)   || 0,
-    cogs:     parseFloat(document.getElementById('s-cogs').value)     / 100 || 0.35,
-    baseline: parseFloat(document.getElementById('s-baseline').value) || 0,
+    target:        parseFloat(document.getElementById('s-target').value)        || 0,
+    cogs:          parseFloat(document.getElementById('s-cogs').value)          / 100 || 0.35,
+    baseline:      parseFloat(document.getElementById('s-baseline').value)      || 0,
+    ordersTarget:  parseFloat(document.getElementById('s-orders-target').value) || 0,
+    aovTarget:     parseFloat(document.getElementById('s-aov-target').value)    || 0,
+    timeframe:     document.getElementById('s-timeframe').value || 'monthly',
   };
 }
 
@@ -809,6 +927,61 @@ function filteredRows() {
     (!f.status || r.finStatus === f.status) &&
     (!f.source || r.src       === f.source)
   );
+}
+
+// ── Pace & Forecast helpers ────────────────────────────────────────────────────
+const MONTH_NAMES_JS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+function paceStatus(current, target) {
+  if (!target || target <= 0) return null;
+  const pct = current / target * 100;
+  if (pct >= 105) return { text: '▲ Ahead',    cls: 'pace-ahead'    };
+  if (pct >= 85)  return { text: '✓ On Track',  cls: 'pace-on-track' };
+  if (pct >= 60)  return { text: '⚠ Watch',     cls: 'pace-watch'    };
+  return           { text: '↓ Behind',  cls: 'pace-behind'   };
+}
+
+function setPaceBadge(badgeId, current, target) {
+  const el = document.getElementById(badgeId);
+  el.className = 'pace-badge';
+  const ps = paceStatus(current, target);
+  if (!ps) return;
+  el.textContent = ps.text;
+  el.classList.add(ps.cls, 'visible');
+}
+
+// Linear regression on monthly actuals → project forward
+function linearForecast(sorted) {
+  const n = Math.min(sorted.length, 6);
+  if (n < 2) return null;
+
+  const pts = sorted.slice(-n).map(([k, v], i) => ({ x: i, y: v.rev, mKey: k, mLabel: v.label }));
+
+  const sumX  = pts.reduce((s, p) => s + p.x, 0);
+  const sumY  = pts.reduce((s, p) => s + p.y, 0);
+  const sumXY = pts.reduce((s, p) => s + p.x * p.y, 0);
+  const sumX2 = pts.reduce((s, p) => s + p.x * p.x, 0);
+  const den   = n * sumX2 - sumX * sumX;
+  if (Math.abs(den) < 0.001) return null;
+
+  const m = (n * sumXY - sumX * sumY) / den;
+  const b = (sumY - m * sumX) / n;
+
+  const lastPt   = pts[pts.length - 1];
+  const [lastYr, lastMo] = lastPt.mKey.split('-').map(Number);
+
+  const projections = [];
+  for (let i = 1; i <= 2; i++) {
+    let pm = lastMo + i, py = lastYr;
+    if (pm > 12) { pm -= 12; py++; }
+    projections.push({
+      mKey:   `${py}-${String(pm).padStart(2,'0')}`,
+      mLabel: MONTH_NAMES_JS[pm - 1] + ' ' + py,
+      value:  Math.max(0, m * (lastPt.x + i) + b),
+    });
+  }
+
+  return { m, b, projections, pts };
 }
 
 // ── Prior period rows ──────────────────────────────────────────────────────────
@@ -867,7 +1040,7 @@ function render() {
   else if (refRate < 5) refPill.classList.add('warn');
   else                  refPill.classList.add('bad');
 
-  // ── Target progress bar ────────────────────────────────────
+  // ── Target progress bar — Revenue ─────────────────────────
   const targetWrap = document.getElementById('target-bar-wrap');
   if (settings.target > 0 && (f.year || f.month)) {
     const pct = Math.min(totRev / settings.target * 100, 100);
@@ -875,11 +1048,30 @@ function render() {
     document.getElementById('target-bar-fill').style.background =
       pct >= 100 ? 'var(--good)' : pct >= 75 ? 'var(--warn)' : 'var(--primary)';
     document.getElementById('target-bar-label').textContent =
-      pct.toFixed(1) + '% of $' + settings.target.toLocaleString() + ' target';
+      pct.toFixed(1) + '% of ' + fmt$(settings.target) + ' target';
     targetWrap.classList.add('visible');
   } else {
     targetWrap.classList.remove('visible');
   }
+  setPaceBadge('pace-revenue', totRev, settings.target);
+
+  // ── Target progress bar — Orders ──────────────────────────
+  const ordersBarWrap = document.getElementById('orders-bar-wrap');
+  if (settings.ordersTarget > 0) {
+    const pct = Math.min(orders / settings.ordersTarget * 100, 100);
+    document.getElementById('orders-bar-fill').style.width = pct.toFixed(1) + '%';
+    document.getElementById('orders-bar-fill').style.background =
+      pct >= 100 ? 'var(--good)' : pct >= 75 ? 'var(--warn)' : 'var(--primary)';
+    document.getElementById('orders-bar-label').textContent =
+      pct.toFixed(1) + '% of ' + settings.ordersTarget.toLocaleString() + ' target';
+    ordersBarWrap.classList.add('visible');
+  } else {
+    ordersBarWrap.classList.remove('visible');
+  }
+  setPaceBadge('pace-orders', orders, settings.ordersTarget);
+
+  // ── Pace badge — AOV ──────────────────────────────────────
+  setPaceBadge('pace-aov', aov, settings.aovTarget);
 
   // ── MoM delta badges ──────────────────────────────────────
   if (prior && prior.length > 0) {
@@ -938,9 +1130,12 @@ function render() {
       ? `${discRate.toFixed(1)}% of revenue given in discounts`
       : 'No discounts in this period';
 
-  // ── Monthly trend (with gross profit line) ─────────────────
+  // ── Monthly trend (with gross profit line + forecast) ──────
   const monthlyMap = {};
-  rows.forEach(r => {
+  allRows.filter(r =>
+    (!f.status || r.finStatus === f.status) &&
+    (!f.source || r.src       === f.source)
+  ).forEach(r => {
     if (!r.mKey) return;
     if (!monthlyMap[r.mKey]) monthlyMap[r.mKey] = { label: r.mLabel, rev: 0, net: 0, disc: 0 };
     monthlyMap[r.mKey].rev  += r.total;
@@ -948,17 +1143,74 @@ function render() {
     monthlyMap[r.mKey].disc += r.disc;
   });
   const sorted   = Object.entries(monthlyMap).sort(([a],[b]) => a.localeCompare(b));
-  const tLabels  = sorted.map(([,v]) => v.label);
-  const tRevData = sorted.map(([,v]) => +v.rev.toFixed(2));
-  const tNetData = sorted.map(([,v]) => +v.net.toFixed(2));
-  const tProfData= sorted.map(([,v]) => +(v.net * (1 - settings.cogs)).toFixed(2));
+
+  // Build forecast from full history (status/source filtered, not year/month filtered)
+  const forecast = linearForecast(sorted);
+
+  // ── Forecast card ──────────────────────────────────────────
+  const fcCard = document.getElementById('forecast-card');
+  if (forecast) {
+    const proj1     = forecast.projections[0];
+    const nMonths   = forecast.pts.length;
+    const trendWord = forecast.m >= 0 ? 'growing' : 'declining';
+
+    document.getElementById('forecast-projected-value').textContent = fmt$(proj1.value);
+    document.getElementById('forecast-projected-sub').textContent   = proj1.mLabel;
+
+    let sentence = `Based on a ${trendWord} trend over the last ${nMonths} months, revenue is projected to reach ${fmt$(proj1.value)} by ${proj1.mLabel}.`;
+    if (settings.target > 0) {
+      if (proj1.value >= settings.target) {
+        sentence += ` You're on pace to meet your ${fmt$(settings.target)} target.`;
+      } else {
+        const gap = settings.target - proj1.value;
+        sentence += ` That's ${fmt$(gap)} short of your ${fmt$(settings.target)} target — consider reviewing your channel mix or discount strategy.`;
+      }
+    }
+
+    document.getElementById('forecast-sentence').textContent = sentence;
+    document.getElementById('forecast-meta').textContent =
+      `Projection based on linear trend (last ${nMonths} months of actuals). Adjust filters to refine the forecast window.`;
+    fcCard.classList.add('visible');
+  } else {
+    fcCard.classList.remove('visible');
+  }
 
   const sc = SCHEMES[currentScheme];
-  renderChart('chart-trend', 'bar', tLabels, [
-    { label: 'Total Revenue',    data: tRevData,  backgroundColor: hexAlpha(sc.c1,.70), borderColor: sc.c1, borderWidth: 1.5, borderRadius: 4 },
-    { label: 'Net Sales',        data: tNetData,  type: 'line', borderColor: sc.c3, backgroundColor: hexAlpha(sc.c3,.12), borderWidth: 2, pointRadius: 3, tension: .35, fill: true },
-    { label: 'Est. Gross Profit',data: tProfData, type: 'line', borderColor: sc.c2, backgroundColor: 'transparent', borderWidth: 2, pointRadius: 3, tension: .35, borderDash: [4,3] },
-  ], { y: { title: 'Revenue ($)' } });
+
+  // Filter trend data to selected year/month for display (forecast always uses full history)
+  const filteredSorted = sorted.filter(([k]) => {
+    const [ky, km] = k.split('-');
+    return (!f.year || ky === f.year) && (!f.month || km === f.month);
+  });
+
+  // Build chart arrays from display-filtered data, then append projected months if applicable
+  const chartLabels = filteredSorted.map(([,v]) => v.label);
+  const chartRev    = filteredSorted.map(([,v]) => +v.rev.toFixed(2));
+  const chartNet    = filteredSorted.map(([,v]) => +v.net.toFixed(2));
+  const chartProf   = filteredSorted.map(([,v]) => +(v.net * (1 - settings.cogs)).toFixed(2));
+  const chartProj   = filteredSorted.map(() => null); // null for all displayed historical months
+
+  const showProjected = !f.month && forecast && filteredSorted.length >= 2;
+  if (showProjected) {
+    chartProj[chartProj.length - 1] = chartRev[chartRev.length - 1]; // bridge from last actual
+    forecast.projections.forEach(p => {
+      chartLabels.push(p.mLabel);
+      chartRev.push(null);
+      chartNet.push(null);
+      chartProf.push(null);
+      chartProj.push(+p.value.toFixed(2));
+    });
+  }
+
+  const chartDatasets = [
+    { label: 'Total Revenue',    data: chartRev,  backgroundColor: hexAlpha(sc.c1,.70), borderColor: sc.c1, borderWidth: 1.5, borderRadius: 4 },
+    { label: 'Net Sales',        data: chartNet,  type: 'line', borderColor: sc.c3, backgroundColor: hexAlpha(sc.c3,.12), borderWidth: 2, pointRadius: 3, tension: .35, fill: true },
+    { label: 'Est. Gross Profit',data: chartProf, type: 'line', borderColor: sc.c2, backgroundColor: 'transparent', borderWidth: 2, pointRadius: 3, tension: .35, borderDash: [4,3] },
+  ];
+  if (showProjected) {
+    chartDatasets.push({ label: 'Projected Revenue', data: chartProj, type: 'line', borderColor: '#f59e0b', backgroundColor: 'transparent', borderWidth: 2, pointRadius: 3, tension: .35, borderDash: [6,4], spanGaps: false });
+  }
+  renderChart('chart-trend', 'bar', chartLabels, chartDatasets, { y: { title: 'Revenue ($)' } });
 
   // ── Channel mix ────────────────────────────────────────────
   const srcMap = {};
