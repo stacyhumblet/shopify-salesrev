@@ -325,13 +325,21 @@
       color: var(--muted);
       margin-top: 4px;
     }
+    .kpi-pill .kpi-value { color: var(--primary); }
+    /* purple — revenue/volume metrics */
     .kpi-pill.highlight { border-color: var(--primary); }
     .kpi-pill.highlight .kpi-value { color: var(--primary); }
-    .kpi-pill.good .kpi-value { color: var(--good); }
-    .kpi-pill.warn .kpi-value { color: var(--warn); }
-    .kpi-pill.bad  .kpi-value { color: var(--bad);  }
+    .kpi-pill.good { border-color: var(--primary); }
+    .kpi-pill.good .kpi-value { color: var(--primary); }
+    /* cyan — profitability */
     .kpi-pill.accent { border-color: var(--accent); }
     .kpi-pill.accent .kpi-value { color: var(--accent); }
+    /* amber — watch metrics (keep low) */
+    .kpi-pill.warn { border-color: var(--warn); }
+    .kpi-pill.warn .kpi-value { color: var(--warn); }
+    /* red — critical threshold exceeded */
+    .kpi-pill.bad { border-color: var(--bad); }
+    .kpi-pill.bad .kpi-value { color: var(--bad); }
 
     /* delta badge */
     .delta {
@@ -585,17 +593,17 @@
           <div class="target-bar-label" id="target-bar-label"></div>
         </div>
       </div>
-      <div class="kpi-pill good">
+      <div class="kpi-pill highlight">
         <div class="kpi-label">Net Sales</div>
         <div class="kpi-value" id="kpi-net">—</div>
         <div class="kpi-sub" id="kpi-net-sub">After refunds &amp; discounts</div>
       </div>
-      <div class="kpi-pill">
+      <div class="kpi-pill highlight">
         <div class="kpi-label">Total Orders</div>
         <div class="kpi-value" id="kpi-orders">—</div>
         <div class="kpi-sub" id="kpi-orders-sub">Transactions</div>
       </div>
-      <div class="kpi-pill">
+      <div class="kpi-pill highlight">
         <div class="kpi-label">Avg Order Value</div>
         <div class="kpi-value" id="kpi-aov">—</div>
         <div class="kpi-sub" id="kpi-aov-sub">Revenue / orders</div>
@@ -625,12 +633,12 @@
         <div class="kpi-value" id="kpi-margin">—</div>
         <div class="kpi-sub">Gross profit / net sales</div>
       </div>
-      <div class="kpi-pill" id="kpi-mom-pill">
+      <div class="kpi-pill highlight" id="kpi-mom-pill">
         <div class="kpi-label">Revenue vs Prior Period</div>
         <div class="kpi-value" id="kpi-mom">—</div>
         <div class="kpi-sub" id="kpi-mom-sub">Select a year or month to compare</div>
       </div>
-      <div class="kpi-pill" id="kpi-forecast-pill">
+      <div class="kpi-pill warn" id="kpi-forecast-pill">
         <div class="kpi-label">Discount Recapture Opportunity</div>
         <div class="kpi-value" id="kpi-forecast">—</div>
         <div class="kpi-sub" id="kpi-forecast-sub">Revenue lost to discounts this period</div>
