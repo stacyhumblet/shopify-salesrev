@@ -171,12 +171,12 @@
     /* ── Filters ───────────────────────────────────────────── */
     .filters-grid {
       display: grid;
-      grid-template-columns: repeat(5, minmax(0,1fr));
+      grid-template-columns: repeat(6, minmax(0,1fr));
       gap: 10px;
       margin-top: 12px;
     }
-    @media (max-width: 900px) { .filters-grid { grid-template-columns: repeat(3,1fr); } }
-    @media (max-width: 560px) { .filters-grid { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 1000px) { .filters-grid { grid-template-columns: repeat(3,1fr); } }
+    @media (max-width: 560px)  { .filters-grid { grid-template-columns: 1fr 1fr; } }
 
     .field label {
       display: block;
@@ -548,9 +548,15 @@
           </select>
         </div>
         <div class="field">
-          <label>Channel (UTM Source)</label>
+          <label>Marketing Channel</label>
           <select id="f-source" onchange="applyFilters()">
             <option value="">All Channels</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Sales Channel</label>
+          <select id="f-channel" onchange="applyFilters()">
+            <option value="">All Origins</option>
           </select>
         </div>
         <button class="reset-btn" onclick="resetFilters()">↺ Reset</button>
@@ -677,8 +683,8 @@
         <div class="chart-wrap-sm"><canvas id="chart-status"></canvas></div>
       </div>
       <div class="card">
-        <div class="card-title">Top Products</div>
-        <div class="card-subtitle">Net sales by product (top 10)</div>
+        <div class="card-title">Top Campaigns</div>
+        <div class="card-subtitle">Net sales by UTM campaign (from landing_site) — top 10</div>
         <div class="chart-wrap"><canvas id="chart-campaigns"></canvas></div>
       </div>
     </div>
@@ -686,8 +692,8 @@
     <!-- Discount Intelligence + Channel Efficiency -->
     <div class="chart-row chart-row-1-1">
       <div class="card">
-        <div class="card-title">Discount by Channel</div>
-        <div class="card-subtitle">Avg discount % by sales channel — how deep are you discounting per source?</div>
+        <div class="card-title">Sales Channel Mix</div>
+        <div class="card-subtitle">Orders by origin — web store, point-of-sale, mobile app</div>
         <div class="chart-wrap"><canvas id="chart-discount-depth"></canvas></div>
       </div>
       <div class="card">
@@ -725,30 +731,47 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ── Transform: Shopify KV → rows ───────────────────────────────────────────────
-// Field notes:
-//   source_name: real Shopify API returns "web","pos","iphone" — demo uses UTM names
-//   r.camp:      ❌ UTM campaign not in Orders API (would need landing_site URL parsing)
-//   r.ref:       ❌ Refund amounts need order.refunds[] array (not in basic orders scope)
+// Shopify has TWO distinct "channel" concepts:
+//   source_name  = HOW the order was placed: "web" (online store), "pos" (in-person), "iphone"/"android" (app)
+//   landing_site = WHERE the customer came from: URL containing UTM params (utm_source, utm_campaign, etc.)
+// r.src          → UTM source from landing_site (instagram, google, email…) — the marketing channel
+// r.sales_channel→ source_name (web, pos, iphone) — the order origin
+// r.camp         → UTM campaign from landing_site ✅
+// r.ref          → ❌ Refund amounts need order.refunds[] array (currently zero'd)
+function parseUTM(landingSite) {
+  if (!landingSite) return {};
+  try {
+    const url = new URL(landingSite.startsWith('http') ? landingSite : 'https://x.com' + landingSite);
+    return {
+      source:   url.searchParams.get('utm_source')   || '',
+      medium:   url.searchParams.get('utm_medium')   || '',
+      campaign: url.searchParams.get('utm_campaign') || '',
+    };
+  } catch { return {}; }
+}
+
 function transformShopify(raw) {
   const orders = raw.orders || [];
   const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   const rows = [];
   orders.forEach(order => {
-    const d   = new Date(order.created_at);
-    const yr  = String(d.getFullYear());
-    const mo  = String(d.getMonth() + 1).padStart(2, '0');
+    const d      = new Date(order.created_at);
+    const yr     = String(d.getFullYear());
+    const mo     = String(d.getMonth() + 1).padStart(2, '0');
     const mKey   = yr + '-' + mo;
     const mLabel = MONTHS[d.getMonth()] + ' ' + yr;
-    const total  = parseFloat(order.total_price)      || 0;
-    const disc   = parseFloat(order.total_discounts)  || 0;
-    const ref    = 0; // refunds not in basic orders — needs order.refunds[] array
+    const total  = parseFloat(order.total_price)     || 0;
+    const disc   = parseFloat(order.total_discounts) || 0;
+    const ref    = 0; // needs order.refunds[] array
     const net    = total - disc - ref;
+    const utms   = parseUTM(order.landing_site);
     rows.push({
       total, net, disc, ref,
-      src:       order.source_name || 'direct',
-      camp:      '(none)',  // campaign not available in Shopify Orders API
-      finStatus: order.financial_status || 'unknown',
-      lineItems: order.line_items || [],
+      src:          utms.source || order.source_name || 'direct',  // UTM source (marketing channel)
+      camp:         utms.campaign || '(none)',                      // UTM campaign ✅
+      sales_channel: order.source_name || 'web',                   // order origin (web/pos/iphone)
+      finStatus:    order.financial_status || 'unknown',
+      lineItems:    order.line_items || [],
       yr, mo, mKey, mLabel,
     });
   });
@@ -757,7 +780,8 @@ function transformShopify(raw) {
   const months   = uniq(rows.map(r => r.mo)).map(m => ({ value: m, label: MONTHS[parseInt(m) - 1] }));
   const statuses = uniq(rows.map(r => r.finStatus));
   const sources  = uniq(rows.map(r => r.src));
-  return { rows, fo: { years, months, statuses, sources } };
+  const channels = uniq(rows.map(r => r.sales_channel));
+  return { rows, fo: { years, months, statuses, sources, channels } };
 }
 
 function onData(data) {
@@ -823,25 +847,27 @@ function populateFilters(fo) {
       el.appendChild(opt);
     });
   };
-  sel('f-year',   fo.years);
-  sel('f-month',  fo.months);
-  sel('f-status', fo.statuses);
-  sel('f-source', fo.sources);
+  sel('f-year',    fo.years);
+  sel('f-month',   fo.months);
+  sel('f-status',  fo.statuses);
+  sel('f-source',  fo.sources);
+  sel('f-channel', fo.channels);
 }
 
 function getFilters() {
   return {
-    year:   document.getElementById('f-year').value,
-    month:  document.getElementById('f-month').value,
-    status: document.getElementById('f-status').value,
-    source: document.getElementById('f-source').value,
+    year:    document.getElementById('f-year').value,
+    month:   document.getElementById('f-month').value,
+    status:  document.getElementById('f-status').value,
+    source:  document.getElementById('f-source').value,
+    channel: document.getElementById('f-channel').value,
   };
 }
 
 function applyFilters() { render(); }
 
 function resetFilters() {
-  ['f-year','f-month','f-status','f-source'].forEach(id => {
+  ['f-year','f-month','f-status','f-source','f-channel'].forEach(id => {
     document.getElementById(id).value = '';
   });
   render();
@@ -850,10 +876,11 @@ function resetFilters() {
 function filteredRows() {
   const f = getFilters();
   return allRows.filter(r =>
-    (!f.year   || r.yr        === f.year)   &&
-    (!f.month  || r.mo        === f.month)  &&
-    (!f.status || r.finStatus === f.status) &&
-    (!f.source || r.src       === f.source)
+    (!f.year    || r.yr           === f.year)    &&
+    (!f.month   || r.mo           === f.month)   &&
+    (!f.status  || r.finStatus    === f.status)  &&
+    (!f.source  || r.src          === f.source)  &&
+    (!f.channel || r.sales_channel === f.channel)
   );
 }
 
@@ -1027,16 +1054,12 @@ function render() {
       borderColor: 'transparent', hoverOffset: 6 }
   ], { legend: true, valueLabel: 'orders' });
 
-  // ── Top Products by Net Sales ──────────────────────────────
-  // Uses line_items from Shopify orders — real Shopify API field ✅
-  const prodMap = {};
-  rows.forEach(r => {
-    (r.lineItems || []).forEach(item => {
-      const name = item.title || item.name || 'Unknown';
-      prodMap[name] = (prodMap[name] || 0) + (parseFloat(item.price) || 0) * (item.quantity || 1);
-    });
-  });
-  const campEntries = Object.entries(prodMap)
+  // ── Top Campaigns by Net Sales ─────────────────────────────
+  // UTM campaign parsed from landing_site URL — real Shopify API field ✅
+  const campMap = {};
+  rows.forEach(r => { campMap[r.camp] = (campMap[r.camp] || 0) + r.net; });
+  const campEntries = Object.entries(campMap)
+    .filter(([k]) => k && k !== '(none)' && k !== '(not set)')
     .sort(([,a],[,b]) => b - a)
     .slice(0, 10);
   renderChart('chart-campaigns', 'bar', campEntries.map(([k]) => k), [
@@ -1045,29 +1068,16 @@ function render() {
       borderRadius: 4, borderSkipped: false }
   ], { indexAxis: 'y', x: { title: 'Net Sales ($)' } });
 
-  // ── Discount by Channel ────────────────────────────────────
-  // Avg discount % by UTM source — campaign not available in Shopify Orders API
-  const discCampMap = {};
-  rows.forEach(r => {
-    if (r.total === 0) return;
-    const pct = r.disc / r.total * 100;
-    if (pct === 0) return;
-    if (!discCampMap[r.src]) discCampMap[r.src] = { sum: 0, count: 0 };
-    discCampMap[r.src].sum   += pct;
-    discCampMap[r.src].count += 1;
-  });
-  const discEntries = Object.entries(discCampMap)
-    .map(([k, v]) => [k, v.sum / v.count])
-    .sort(([,a],[,b]) => b - a)
-    .slice(0, 8);
-  if (discEntries.length > 0) {
-    renderChart('chart-discount-depth', 'bar', discEntries.map(([k]) => k), [
-      { label: 'Avg Discount %',
-        data: discEntries.map(([,v]) => +v.toFixed(1)),
-        backgroundColor: discEntries.map((_, i) => sc.palette[i % sc.palette.length]),
-        borderRadius: 4, borderSkipped: false }
-    ], { indexAxis: 'y', x: { title: 'Avg Discount %' }, valueLabel: 'pct' });
-  }
+  // ── Sales Channel Mix ──────────────────────────────────────
+  // source_name from Shopify = order origin: web / pos / iphone / android
+  const chanMap = {};
+  rows.forEach(r => { chanMap[r.sales_channel] = (chanMap[r.sales_channel] || 0) + 1; });
+  const chanEntries = Object.entries(chanMap).sort(([,a],[,b]) => b - a);
+  renderChart('chart-discount-depth', 'doughnut', chanEntries.map(([k]) => k), [
+    { data: chanEntries.map(([,v]) => v),
+      backgroundColor: sc.palette.slice(0, chanEntries.length),
+      borderColor: 'transparent', hoverOffset: 6 }
+  ], { legend: true, valueLabel: 'orders' });
 
   // ── Channel Efficiency (AOV by source) ────────────────────
   const aovSrcMap = {};
