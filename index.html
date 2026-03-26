@@ -450,7 +450,8 @@
       padding: 16px 20px;
       border-radius: 12px;
       font-size: 13px;
-      margin: 20px 0;
+      margin: 16px auto;
+      max-width: min(1340px, calc(100% - 32px));
     }
 
     /* ── Legend dots ───────────────────────────────────────── */
@@ -517,9 +518,7 @@
 </div>
 
 <!-- Error -->
-<div class="container">
-  <div id="error-msg"></div>
-</div>
+<div id="error-msg"></div>
 
 <!-- Dashboard -->
 <div id="dashboard">
@@ -1215,6 +1214,7 @@ function applyTheme(theme) {
   document.querySelector('.icon-btn').textContent = theme === 'light' ? '🌙 Dark' : '☀️ Light';
   localStorage.setItem('rev-theme', theme);
   if (allRows.length > 0) render();
+  window.parent.postMessage({ type: 'nwp-sidebar-theme', mode: theme }, '*');
 }
 
 // ── Cross-frame theme control (Northwind Tools Suite) ─────────────────────────
