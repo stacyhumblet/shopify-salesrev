@@ -1217,6 +1217,13 @@ function applyTheme(theme) {
   if (allRows.length > 0) render();
 }
 
+// ── Cross-frame theme control (Northwind Tools Suite) ─────────────────────────
+window.addEventListener('message', (e) => {
+  if (!e.data || e.data.type !== 'nwp-theme') return;
+  if (e.data.scheme) setScheme(e.data.scheme);
+  if (e.data.mode)   applyTheme(e.data.mode);
+});
+
 // ── Formatters ─────────────────────────────────────────────────────────────────
 function fmt$(n) {
   if (n >= 1_000_000) return '$' + (n / 1_000_000).toFixed(2) + 'M';
