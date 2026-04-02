@@ -1485,11 +1485,13 @@ function applyTheme(theme) {
 
 // ── Formatters ─────────────────────────────────────────────────────────────────
 function fmt$(n) {
+  if (!isFinite(n) || isNaN(n)) return '—';
   if (n >= 1_000_000) return '$' + (n / 1_000_000).toFixed(2) + 'M';
   if (n >= 1_000)     return '$' + (n / 1_000).toFixed(1) + 'K';
   return '$' + n.toFixed(2);
 }
 function fmtN(n) {
+  if (!isFinite(n) || isNaN(n)) return '—';
   return n >= 1000 ? (n / 1000).toFixed(1) + 'K' : String(n);
 }
 </script>
