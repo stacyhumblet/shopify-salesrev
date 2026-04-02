@@ -314,6 +314,81 @@
       color: var(--muted);
       margin-bottom: 6px;
     }
+    .info-btn {
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-size: 11px;
+      cursor: pointer;
+      padding: 0 0 0 4px;
+      line-height: 1;
+      opacity: 0.7;
+      transition: opacity .15s, color .15s;
+      vertical-align: middle;
+      position: relative;
+      top: -1px;
+    }
+    .info-btn:hover { opacity: 1; color: var(--primary); }
+    .kpi-modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.55);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+    .kpi-modal-overlay.open { display: flex; }
+    .kpi-modal {
+      background: #111827;
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 16px;
+      padding: 24px 28px;
+      max-width: 420px;
+      width: calc(100% - 40px);
+      box-shadow: 0 20px 60px rgba(0,0,0,.6);
+      position: relative;
+    }
+    [data-theme="light"] .kpi-modal {
+      background: #ffffff;
+      border-color: rgba(0,0,0,.12);
+      box-shadow: 0 20px 60px rgba(0,0,0,.15);
+    }
+    .kpi-modal-close {
+      position: absolute;
+      top: 12px; right: 16px;
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-size: 20px;
+      cursor: pointer;
+      line-height: 1;
+      padding: 4px;
+    }
+    .kpi-modal-close:hover { color: var(--text); }
+    .kpi-modal-title {
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--primary);
+      margin-bottom: 14px;
+      padding-right: 24px;
+    }
+    .kpi-modal-section { margin-bottom: 12px; }
+    .kpi-modal-section-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .5px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+    .kpi-modal-section-body {
+      font-size: 13px;
+      color: var(--text);
+      line-height: 1.55;
+    }
+    [data-theme="light"] .kpi-modal { color: #1a2142; }
+    [data-theme="light"] .kpi-modal-section-body { color: #1a2142; }
     .kpi-value {
       font-size: 22px;
       font-weight: 800;
@@ -666,7 +741,7 @@
     <div class="section-label">Revenue Overview</div>
     <div class="kpi-row">
       <div class="kpi-pill highlight" id="kpi-rev-pill">
-        <div class="kpi-label">Total Revenue</div>
+        <div class="kpi-label">Total Revenue <button class="info-btn" onclick="showKpiInfo('revenue')">ⓘ</button></div>
         <div class="kpi-value" id="kpi-revenue">—</div>
         <div class="kpi-sub" id="kpi-revenue-sub">Gross order value</div>
         <div class="target-bar-wrap" id="target-bar-wrap">
@@ -676,12 +751,12 @@
         <div class="pace-badge" id="pace-revenue"></div>
       </div>
       <div class="kpi-pill highlight">
-        <div class="kpi-label">Net Sales</div>
+        <div class="kpi-label">Net Sales <button class="info-btn" onclick="showKpiInfo('net-sales')">ⓘ</button></div>
         <div class="kpi-value" id="kpi-net">—</div>
         <div class="kpi-sub" id="kpi-net-sub">After refunds &amp; discounts</div>
       </div>
       <div class="kpi-pill highlight">
-        <div class="kpi-label">Total Orders</div>
+        <div class="kpi-label">Total Orders <button class="info-btn" onclick="showKpiInfo('orders')">ⓘ</button></div>
         <div class="kpi-value" id="kpi-orders">—</div>
         <div class="kpi-sub" id="kpi-orders-sub">Transactions</div>
         <div class="target-bar-wrap" id="orders-bar-wrap">
@@ -691,18 +766,18 @@
         <div class="pace-badge" id="pace-orders"></div>
       </div>
       <div class="kpi-pill highlight">
-        <div class="kpi-label">Avg Order Value</div>
+        <div class="kpi-label">Avg Order Value <button class="info-btn" onclick="showKpiInfo('aov')">ⓘ</button></div>
         <div class="kpi-value" id="kpi-aov">—</div>
         <div class="kpi-sub" id="kpi-aov-sub">Revenue / orders</div>
         <div class="pace-badge" id="pace-aov"></div>
       </div>
       <div class="kpi-pill warn">
-        <div class="kpi-label">Discount Rate</div>
+        <div class="kpi-label">Discount Rate <button class="info-btn" onclick="showKpiInfo('discount-rate')">ⓘ</button></div>
         <div class="kpi-value" id="kpi-disc">—</div>
         <div class="kpi-sub">% of gross revenue</div>
       </div>
       <div class="kpi-pill" id="kpi-ref-pill">
-        <div class="kpi-label">Refund Rate</div>
+        <div class="kpi-label">Refund Rate <button class="info-btn" onclick="showKpiInfo('refund-rate')">ⓘ</button></div>
         <div class="kpi-value" id="kpi-ref">—</div>
         <div class="kpi-sub">% of gross revenue</div>
       </div>
@@ -712,22 +787,22 @@
     <div class="section-label">Profitability &amp; Forecast</div>
     <div class="kpi-row-2">
       <div class="kpi-pill accent">
-        <div class="kpi-label">Est. Gross Profit</div>
+        <div class="kpi-label">Est. Gross Profit <button class="info-btn" onclick="showKpiInfo('gross-profit')">ⓘ</button></div>
         <div class="kpi-value" id="kpi-profit">—</div>
         <div class="kpi-sub" id="kpi-profit-sub">Net sales × (1 – COGS%)</div>
       </div>
       <div class="kpi-pill accent">
-        <div class="kpi-label">Est. Profit Margin</div>
+        <div class="kpi-label">Est. Profit Margin <button class="info-btn" onclick="showKpiInfo('profit-margin')">ⓘ</button></div>
         <div class="kpi-value" id="kpi-margin">—</div>
         <div class="kpi-sub">Gross profit / net sales</div>
       </div>
       <div class="kpi-pill highlight" id="kpi-mom-pill">
-        <div class="kpi-label">Revenue vs Prior Period</div>
+        <div class="kpi-label">Revenue vs Prior Period <button class="info-btn" onclick="showKpiInfo('rev-vs-prior')">ⓘ</button></div>
         <div class="kpi-value" id="kpi-mom">—</div>
         <div class="kpi-sub" id="kpi-mom-sub">Select a year or month to compare</div>
       </div>
       <div class="kpi-pill warn" id="kpi-forecast-pill">
-        <div class="kpi-label">Discount Recapture Opportunity</div>
+        <div class="kpi-label">Discount Recapture Opportunity <button class="info-btn" onclick="showKpiInfo('discount-recapture')">ⓘ</button></div>
         <div class="kpi-value" id="kpi-forecast">—</div>
         <div class="kpi-sub" id="kpi-forecast-sub">Revenue lost to discounts this period</div>
       </div>
@@ -1418,5 +1493,47 @@ function fmtN(n) {
   return n >= 1000 ? (n / 1000).toFixed(1) + 'K' : String(n);
 }
 </script>
+
+    <div class="kpi-modal-overlay" id="kpiModal" onclick="hideKpiInfo()">
+      <div class="kpi-modal" onclick="event.stopPropagation()">
+        <button class="kpi-modal-close" onclick="hideKpiInfo()">×</button>
+        <div class="kpi-modal-title" id="kpiModalTitle"></div>
+        <div id="kpiModalBody"></div>
+      </div>
+    </div>
+
+    <script>
+    const KPI_INFO = {
+      'revenue':            { title: 'Total Revenue',                  def: 'Gross order value before any refunds or discounts are applied. This is the top-line number — the full amount customers were charged at checkout.',                                                                                                                  benchmark: 'No universal benchmark — context depends on your niche and stage. For a growing online boutique, 15-30%+ year-over-year growth is a strong signal. Focus on trend direction, not just the absolute number.',                                                                                              action: 'If revenue is flat or declining, review which products are stalling, whether your traffic sources are converting, and whether pricing is competitive. Compare to prior periods to spot seasonal patterns.' },
+      'net-sales':          { title: 'Net Sales',                      def: 'Gross revenue minus refunds and discounts. This is what you actually keep before cost of goods. It is a more accurate picture of real sales performance than gross revenue.',                                                                                          benchmark: 'Net sales should be 80-95% of gross revenue. Below 80% means discounts or returns are heavily eating into your top line.',                                                                                                                                                                            action: 'If net sales are well below gross, investigate whether discount rates are too high or if refund rates are elevated. Both erode real revenue without showing up in gross numbers.' },
+      'orders':             { title: 'Total Orders',                   def: 'The total number of completed transactions in the selected period. Each order = one customer checkout.',                                                                                                                                                                   benchmark: 'For an online boutique doing $5k-$15k/month, expect 50-200 orders/month depending on AOV. Order growth rate matters more than the absolute count.',                                                                                                                                                   action: 'If orders are declining while traffic holds steady, the issue is conversion — look at your site experience, pricing, or checkout flow. If both traffic and orders are down, focus on top-of-funnel.' },
+      'aov':                { title: 'Avg Order Value',                def: 'Average revenue per order. Calculated as total revenue divided by total orders. Higher AOV means each customer is spending more per visit.',                                                                                                                               benchmark: 'Fashion and online boutiques typically see AOV of $45-$85. AOV of $100+ is strong. Under $40 may indicate customers are buying single low-price items only.',                                                                                                                                          action: 'To raise AOV: add product bundles, offer free shipping thresholds above your current AOV, or use post-purchase upsells. Even a $10 AOV increase compounds significantly at volume.' },
+      'discount-rate':      { title: 'Discount Rate',                  def: 'The percentage of gross revenue given away as discounts. A discount rate of 15% means you gave back $15 for every $100 earned.',                                                                                                                                          benchmark: 'Under 10% is healthy. 10-20% is a watch zone. Over 20% means discounts are heavily eroding margins and training customers to wait for sales.',                                                                                                                                                       action: 'If your discount rate is high, consider narrowing sale windows, reducing discount depth (e.g. 15% instead of 25%), or shifting to loyalty perks instead of sitewide discounts.' },
+      'refund-rate':        { title: 'Refund Rate',                    def: 'The percentage of gross revenue returned via refunds. High refund rates often signal product quality issues, sizing problems, or misleading product photography.',                                                                                                          benchmark: 'Under 3% is excellent. 3-8% is normal for fashion ecommerce where sizing varies. 8%+ is a red flag — investigate which products are being returned most.',                                                                                                                                            action: 'If refund rate is high, audit your top-returned products: are photos accurate, are size charts clear, is quality consistent? Adding customer reviews can also reduce expectation mismatch.' },
+      'gross-profit':       { title: 'Est. Gross Profit',              def: 'Estimated profit after subtracting cost of goods (COGS) from net sales. This uses your COGS% setting and is an estimate — actual margins depend on your true product costs.',                                                                                              benchmark: 'Gross margin for fashion ecommerce typically runs 40-60%. Below 35% is tight. Above 60% is excellent, especially for private label or high-markup products.',                                                                                                                                          action: 'To improve gross profit: negotiate better supplier costs, reduce discount depth, or shift product mix toward higher-margin items. Gross profit is the pool that covers all your other expenses.' },
+      'profit-margin':      { title: 'Est. Profit Margin',             def: 'Gross profit as a percentage of net sales. This is your estimated margin per dollar of revenue after cost of goods — before operating expenses like ads, shipping, and platform fees.',                                                                                    benchmark: 'A gross margin of 40-60% is healthy for online boutiques. Net profit margin (after all expenses) typically lands at 10-20% for well-run small ecomm businesses.',                                                                                                                                     action: 'If margin is thin, look at your COGS first — even small per-unit cost reductions add up. Then review whether discounts are compressing margin. Margin is more important than revenue volume.' },
+      'rev-vs-prior':       { title: 'Revenue vs Prior Period',        def: 'The percentage change in revenue compared to the previous equivalent period. Green means growth, red means decline versus your baseline.',                                                                                                                                    benchmark: 'Month-over-month growth of 5-15% is healthy for a growing boutique. Seasonal dips (post-holiday, mid-summer) are normal. Year-over-year is a cleaner signal than MoM.',                                                                                                                              action: 'If revenue is down vs. prior period, check whether it is seasonal (compare to same period last year) or a true decline. Then isolate whether the drop is in traffic, conversion rate, or AOV — each has a different fix.' },
+      'discount-recapture': { title: 'Discount Recapture Opportunity', def: 'The total dollar value of discounts given away in the selected period. This is money that could have been kept as revenue if customers had paid full price.',                                                                                                              benchmark: 'There is no "good" number here — it is a diagnostic tool. The question to ask: what percentage of those customers needed the discount to convert, versus how many would have bought anyway?',                                                                                                         action: 'If this number is large, experiment with smaller discount windows, loyalty-based offers instead of sitewide codes, or raising base prices slightly so discounted prices still hit your margin targets.' },
+    };
+
+    function showKpiInfo(key) {
+      const d = KPI_INFO[key];
+      if (!d) return;
+      document.getElementById('kpiModalTitle').textContent = d.title;
+      document.getElementById('kpiModalBody').innerHTML =
+        '<div class="kpi-modal-section"><div class="kpi-modal-section-label">What it is</div><div class="kpi-modal-section-body">' + d.def + '</div></div>' +
+        '<div class="kpi-modal-section"><div class="kpi-modal-section-label">Industry benchmark</div><div class="kpi-modal-section-body">' + d.benchmark + '</div></div>' +
+        '<div class="kpi-modal-section"><div class="kpi-modal-section-label">What to do</div><div class="kpi-modal-section-body">' + d.action + '</div></div>';
+      document.getElementById('kpiModal').classList.add('open');
+    }
+
+    function hideKpiInfo() {
+      document.getElementById('kpiModal').classList.remove('open');
+    }
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') hideKpiInfo();
+    });
+    </script>
 </body>
 </html>
