@@ -1293,7 +1293,7 @@ function render() {
   const srcEntries = Object.entries(srcMap).sort(([,a],[,b]) => b - a);
   renderChart('chart-channel', 'doughnut', srcEntries.map(([k]) => k), [
     { data: srcEntries.map(([,v]) => +v.toFixed(2)),
-      backgroundColor: SCHEMES[currentScheme].palette.slice(0, srcEntries.length),
+      backgroundColor: srcEntries.map((_, i) => i === 0 ? SCHEMES[currentScheme].c1 : NEUTRAL_PALETTE[(i - 1) % NEUTRAL_PALETTE.length]),
       borderColor: 'transparent', hoverOffset: 6 }
   ], { legend: true });
 
@@ -1301,7 +1301,7 @@ function render() {
   const statusMap = {};
   rows.forEach(r => { statusMap[r.finStatus] = (statusMap[r.finStatus] || 0) + 1; });
   const statusEntries = Object.entries(statusMap).sort(([,a],[,b]) => b - a);
-  const statusColors = statusEntries.map((_, i) => sc.palette[i % sc.palette.length]);
+  const statusColors = statusEntries.map((_, i) => i === 0 ? SCHEMES[currentScheme].c1 : NEUTRAL_PALETTE[(i - 1) % NEUTRAL_PALETTE.length]);
   renderChart('chart-status', 'doughnut', statusEntries.map(([k]) => k), [
     { data: statusEntries.map(([,v]) => v),
       backgroundColor: statusColors,
@@ -1317,7 +1317,7 @@ function render() {
     .slice(0, 10);
   renderChart('chart-campaigns', 'bar', campEntries.map(([k]) => k), [
     { label: 'Net Sales', data: campEntries.map(([,v]) => +v.toFixed(2)),
-      backgroundColor: campEntries.map((_, i) => SCHEMES[currentScheme].palette[i % SCHEMES[currentScheme].palette.length]),
+      backgroundColor: campEntries.map((_, i) => i === 0 ? SCHEMES[currentScheme].c1 : NEUTRAL_PALETTE[(i - 1) % NEUTRAL_PALETTE.length]),
       borderRadius: 4, borderSkipped: false }
   ], { indexAxis: 'y', x: { title: 'Net Sales ($)' } });
 
@@ -1340,7 +1340,7 @@ function render() {
     renderChart('chart-discount-depth', 'bar', discEntries.map(([k]) => k), [
       { label: 'Avg Discount %',
         data: discEntries.map(([,v]) => +v.toFixed(1)),
-        backgroundColor: discEntries.map((_, i) => sc.palette[i % sc.palette.length]),
+        backgroundColor: discEntries.map((_, i) => i === 0 ? SCHEMES[currentScheme].c1 : NEUTRAL_PALETTE[(i - 1) % NEUTRAL_PALETTE.length]),
         borderRadius: 4, borderSkipped: false }
     ], { indexAxis: 'y', x: { title: 'Avg Discount %' }, valueLabel: 'pct' });
   }
@@ -1358,7 +1358,7 @@ function render() {
   renderChart('chart-channel-aov', 'bar', aovEntries.map(([k]) => k), [
     { label: 'Avg Order Value ($)',
       data: aovEntries.map(([,v]) => +v.toFixed(2)),
-      backgroundColor: aovEntries.map((_, i) => SCHEMES[currentScheme].palette[i % SCHEMES[currentScheme].palette.length]),
+      backgroundColor: aovEntries.map((_, i) => i === 0 ? SCHEMES[currentScheme].c1 : NEUTRAL_PALETTE[(i - 1) % NEUTRAL_PALETTE.length]),
       borderRadius: 4, borderSkipped: false }
   ], { indexAxis: 'y', x: { title: 'Avg Order Value ($)' } });
 }
@@ -1388,6 +1388,7 @@ const SCHEMES = {
   rose:    { c1:'#e879f9', c2:'#a855f7', c3:'#818cf8',
     palette:['#e879f9','#a855f7','#818cf8','#f0abfc','#c084fc','#a5b4fc','#f9a8d4','#d8b4fe','#c7d2fe','#ddd6fe'] },
 };
+const NEUTRAL_PALETTE = ['#475569','#64748b','#78909c','#94a3b8','#6b7280','#9ca3af','#b0bec5','#adb5bd'];
 let currentScheme = 'creator';
 
 function hexAlpha(hex, a) {
